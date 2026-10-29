@@ -1,0 +1,51 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Organisateur : courriel confirmé et présent dans cette liste
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in ['bartolomeovictor@gmail.com'];
+    }
+    function isSelf(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // Réglages du tournoi et scores : tout le monde lit, seul l'organisateur écrit
+    match /tournoi/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /matchs/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Inscriptions : visibles par tous (nom, icône, dispos), chacun modifie la sienne
+    match /inscriptions/{uid} {
+      allow read: if true;
+      allow create, update: if isAdmin()
+        || (isSelf(uid) && request.resource.data.nom is string && request.resource.data.nom.size() <= 28);
+      allow delete: if isAdmin() || isSelf(uid);
+    }
+
+    // Scores entrés par les joueurs : tout le monde lit, chacun écrit seulement les siens
+    match /rapports/{uid} {
+      allow read: if true;
+      allow write: if isAdmin() || isSelf(uid);
+    }
+
+    // Demandes d'arbitre (nom seulement) : l'organisateur approuve dans index.html
+    match /arbitres/{uid} {
+      allow read: if true;
+      allow write: if isAdmin() || (isSelf(uid) && request.resource.data.keys().hasOnly(['nom','at']));
+      allow delete: if isAdmin() || isSelf(uid);
+    }
+
+    // Contacts (courriel / Discord) : seulement la personne et l'organisateur
+    match /contacts/{uid} {
+      allow read, write: if isAdmin() || isSelf(uid);
+    }
+  }
+}

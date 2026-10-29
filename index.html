@@ -1,0 +1,1239 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ping Pong Tournoi #2</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Outfit:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one crimson sheet like the event posters — hero with the 6 match days, tab strip, then one view at a time (form / bracket / schedule / organizer). Deliberately single-theme (the club's poster identity). */
+:root{
+  --red:#A3303F; --red-deep:#872636; --red-ink:#6B1A27; --red-line:rgba(255,255,255,.18);
+  --yellow:#F6CF4A; --yellow-ink:#4A2A05;
+  --paper:#FFFFFF; --paper-2:#F7EEEF; --ink:#2B1216; --ink-soft:#7C5A60; --line:#EAD9DC;
+  --on-red:#FFFFFF; --on-red-soft:rgba(255,255,255,.74);
+  --win:#1F7A4D; --live:#E5484D; --warn:#B45309; --warn-bg:#FEF3C7;
+  --f-display:"Bricolage Grotesque", "Arial Black", system-ui, sans-serif;
+  --f-body:"Outfit", "Segoe UI", system-ui, sans-serif;
+  --r:12px;
+  color-scheme:light;
+}
+html{background:var(--red)}
+[hidden]{display:none!important}
+body{margin:0;background:var(--red);color:var(--on-red);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.05}
+.eyebrow{font-family:var(--f-display);font-weight:800;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--yellow)}
+button,input,select,textarea{font:inherit}
+:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;border-bottom:1px solid var(--red-line);padding-bottom:22px}
+.hero h1{font-size:clamp(38px,7vw,72px);font-weight:800;letter-spacing:-.02em;margin-top:6px}
+.hero .tag{font-size:clamp(17px,2.2vw,21px);font-weight:600;margin:14px 0 0;max-width:62ch}
+.hero .tag b{color:var(--yellow);font-weight:700}
+.where{text-align:right;font-weight:500;color:var(--on-red-soft)}
+.where strong{display:block;color:var(--on-red);font-family:var(--f-display);font-size:18px}
+.days{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:22px}
+.day{background:var(--red-deep);border-radius:var(--r);padding:12px 14px;display:flex;gap:12px;align-items:center}
+.day.final{background:var(--yellow);color:var(--yellow-ink)}
+.day .d{background:var(--yellow);color:var(--yellow-ink);border-radius:10px;width:50px;flex:none;text-align:center;padding:5px 0;font-family:var(--f-display);line-height:1}
+.day.final .d{background:var(--red);color:#fff}
+.day .d small{display:block;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.day .d span{font-size:23px;font-weight:800}
+.day b{display:block;font-family:var(--f-display);font-size:15px;font-weight:800;line-height:1.15}
+.day p{margin:2px 0 0;color:var(--on-red-soft);font-size:12.5px;line-height:1.3}
+.day.final p{color:var(--yellow-ink)}
+.facts{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:16px;font-size:14px;color:var(--on-red-soft)}
+.facts b{color:var(--on-red);font-weight:600}
+.facts .hl{color:var(--yellow);font-weight:700}
+
+/* tabs */
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--red);display:flex;gap:6px;padding:14px 0;margin-top:8px;overflow-x:auto}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--red)}
+.tabs a{flex:none;text-decoration:none;color:var(--on-red);font-weight:600;padding:9px 16px;border-radius:999px;border:1.5px solid var(--red-line)}
+.tabs a:hover{border-color:var(--on-red-soft)}
+.tabs a[aria-current="page"]{background:var(--yellow);color:var(--yellow-ink);border-color:var(--yellow)}
+.view{margin-top:10px}
+
+/* cards & forms */
+.grid2{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.9fr);gap:20px;align-items:start}
+.card{background:var(--paper);color:var(--ink);border-radius:16px;padding:24px}
+.panel{background:var(--red-deep);border-radius:16px;padding:20px}
+.card h2{font-size:26px;font-weight:800}
+.card .sub{color:var(--ink-soft);margin:6px 0 18px}
+.field{display:grid;gap:6px;margin-bottom:18px}
+.field label,.legend{font-weight:600;font-size:14px}
+.hint{font-size:13px;color:var(--ink-soft)}
+.req{color:var(--red)}
+input[type=text],input[type=email],input[type=time],input[type=date],input[type=number],select,textarea{width:100%;box-sizing:border-box;border:1.5px solid var(--line);border-radius:10px;padding:11px 12px;background:var(--paper);color:var(--ink)}
+input:focus,select:focus,textarea:focus{border-color:var(--red);outline:none;box-shadow:0 0 0 3px rgba(163,48,63,.15)}
+.choices{display:grid;gap:8px}
+.choices.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.choices.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.choice{display:flex;gap:10px;align-items:flex-start;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer}
+.choice:has(input:checked){border-color:var(--red);background:var(--paper-2)}
+.choice input{accent-color:var(--red);margin-top:4px;flex:none}
+.choice small{display:block;color:var(--ink-soft)}
+.choice.day-c{flex-direction:column;gap:2px;align-items:flex-start;position:relative;padding-left:36px}
+.choice.day-c input{position:absolute;left:12px;top:12px;margin:0}
+.choice.day-c b{font-family:var(--f-display);font-size:17px}
+.btn{border:0;border-radius:10px;padding:12px 18px;font-weight:700;cursor:pointer;background:var(--red);color:#fff}
+.btn:hover{background:var(--red-ink)}
+.btn.y{background:var(--yellow);color:var(--yellow-ink)}
+.btn.ghost{background:transparent;color:var(--red);border:1.5px solid var(--line)}
+.btn.ghost:hover{background:var(--paper-2)}
+.btn.sm{padding:7px 12px;font-size:13px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.msg{border-radius:10px;padding:12px 14px;margin-top:14px;font-size:14px}
+.msg.ok{background:#E5F4EC;color:#14532F}
+.msg.err{background:#FDE8E9;color:#8A1C24}
+.msg.info{background:var(--paper-2);color:var(--ink)}
+pre.copy{white-space:pre-wrap;background:var(--paper-2);color:var(--ink);padding:12px;border-radius:10px;font-size:13px;margin:10px 0}
+.side-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.side-h h3{font-size:20px}
+.side-h span{color:var(--on-red-soft);font-size:13px}
+.plist{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:6px}
+.plist li{background:var(--paper);color:var(--ink);border-radius:10px;padding:8px 10px;display:flex;gap:10px;align-items:center;font-weight:600}
+.plist li .meta{margin-left:auto;font-weight:500;font-size:12px;color:var(--ink-soft);text-align:right}
+.plist li.wait{opacity:.7}
+.chip{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 5px;box-sizing:border-box;border-radius:6px;font-family:var(--f-display);font-weight:800;font-size:12px;background:var(--red);color:#fff;flex:none}
+.chip.q{background:var(--yellow);color:var(--yellow-ink)}
+.av{--s:24px;width:var(--s);height:var(--s);border-radius:50%;overflow:hidden;flex:none;display:inline-block;background:var(--paper-2)}
+.av img,.av svg{width:100%;height:100%;display:block;object-fit:cover}
+.av.none{background:transparent}
+.iconpick{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:center}
+.iconpick .prev{width:76px;height:76px;border-radius:50%;border:2px dashed var(--line);display:grid;place-items:center;color:var(--ink-soft);font-size:12px;text-align:center;overflow:hidden}
+.iconpick .prev .av{--s:76px}
+.choice .inline{margin-top:6px}
+.choice>span{min-width:0;flex:1}
+.choice input[type=file]{font-size:13px;width:100%;max-width:100%;min-width:0}
+.prof{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:20px;align-items:start}
+.prof .big{display:grid;justify-items:center;gap:12px;text-align:center}
+.prof .big .av{--s:132px;box-shadow:0 0 0 4px var(--yellow)}
+.prof .big .noicon{width:132px;height:132px;border-radius:50%;background:var(--paper-2);display:grid;place-items:center;font-family:var(--f-display);font-size:48px;font-weight:800;color:var(--red)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:16px 0}
+.tile{background:var(--paper-2);border-radius:12px;padding:12px 14px}
+.tile small{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);font-weight:700}
+.tile b{font-family:var(--f-display);font-size:22px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+.tile b.red{color:var(--red)}
+.kvl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 16px;font-size:14px;margin:0}
+.kvl dt{color:var(--ink-soft)}
+.kvl dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+.hist{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:6px}
+.hist li{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:14px}
+.hist .res{font-family:var(--f-display);font-weight:800;width:22px;text-align:center}
+.hist .res.v{color:var(--win)}.hist .res.d{color:var(--red)}
+.hist .grow{flex:1;min-width:0}
+.hist small{color:var(--ink-soft)}
+@media (max-width:820px){.prof{grid-template-columns:1fr}}
+
+.rules{margin:18px 0 0;padding:0;list-style:none;display:grid;gap:10px;font-size:14px;color:var(--on-red-soft)}
+.rules b{color:var(--on-red)}
+
+/* finder */
+.finder{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:16px;align-items:center;background:var(--red-deep);border-radius:16px;padding:16px 18px;margin-bottom:18px}
+.finder label{font-weight:600;font-size:13px;color:var(--on-red-soft);display:block;margin-bottom:6px}
+.mine{font-size:15px}
+.mine strong{color:var(--yellow);font-family:var(--f-display);font-size:18px}
+.banner{border:1.5px dashed var(--red-line);border-radius:12px;padding:10px 14px;margin-bottom:16px;color:var(--on-red-soft);font-size:14px}
+.banner b{color:var(--yellow)}
+
+/* bracket */
+.bsec{margin-bottom:26px}
+.bsec>.side-h{margin-bottom:10px}
+.bscroll{overflow-x:auto;padding-bottom:10px}
+.bracket{display:flex;gap:22px;min-width:min-content}
+.col{display:flex;flex-direction:column;width:228px;flex:none}
+.col h4{font-family:var(--f-display);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--on-red-soft);margin:0 0 10px;font-weight:800;min-height:28px}
+.col h4 small{display:block;letter-spacing:.04em;text-transform:none;font-family:var(--f-body);font-weight:500;font-size:11px;opacity:.85}
+.col .stack{display:flex;flex-direction:column;justify-content:space-around;gap:12px;flex:1}
+.m{display:block;width:100%;text-align:left;background:var(--paper);color:var(--ink);border:2px solid transparent;border-radius:var(--r);padding:0;cursor:pointer;overflow:hidden}
+.m:hover{border-color:var(--yellow)}
+.m.me{border-color:var(--yellow);box-shadow:0 0 0 3px rgba(246,207,74,.35)}
+.m-head{display:flex;justify-content:space-between;gap:6px;font-size:11px;font-weight:600;color:var(--ink-soft);padding:6px 10px 4px;font-variant-numeric:tabular-nums}
+.m-head .id{font-family:var(--f-display);font-weight:800;color:var(--red)}
+.sd{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 10px;border-top:1px solid var(--line)}
+.sd .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sd.tbd .nm{font-weight:500;color:var(--ink-soft);font-style:italic}
+.sd .sc{font-family:var(--f-display);font-weight:800;font-variant-numeric:tabular-nums;min-width:14px;text-align:right}
+.sd.won .nm,.sd.won .sc{color:var(--win)}
+.sd.lost .nm{color:var(--ink-soft);text-decoration:line-through;text-decoration-color:rgba(124,90,96,.4)}
+.sets{font-size:11px;color:var(--ink-soft);padding:4px 10px 6px;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+.live{display:inline-flex;align-items:center;gap:5px;color:var(--live);font-weight:700}
+.live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--live);animation:pulse 1.4s infinite}
+@keyframes pulse{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.live::before{animation:none}}
+.gf .m{border-color:var(--yellow)}
+.trophy{font-family:var(--f-display);font-weight:800;color:var(--yellow);font-size:20px;margin-bottom:10px}
+
+/* schedule */
+.sched{background:var(--paper);color:var(--ink);border-radius:16px;overflow:hidden;margin-bottom:20px}
+.sched h3{font-size:20px;padding:16px 18px 4px}
+.sched .sub{padding:0 18px 12px;color:var(--ink-soft);font-size:14px;margin:0}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:10px 14px;border-top:1px solid var(--line);font-size:14px;vertical-align:top}
+th{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);font-weight:700;background:var(--paper-2)}
+tr.slot td{background:var(--paper-2);font-family:var(--f-display);font-weight:800;color:var(--red);font-size:13px;letter-spacing:.06em;padding:7px 14px}
+tr.click{cursor:pointer}
+tr.click:hover td{background:var(--paper-2)}
+tr.me td{background:#FFF7D6}
+td.t{font-family:var(--f-display);font-weight:800;white-space:nowrap}
+td .id{font-family:var(--f-display);font-weight:800;color:var(--red)}
+.st{font-size:12px;font-weight:700;border-radius:999px;padding:3px 9px;white-space:nowrap;display:inline-block}
+.st.done{background:#E5F4EC;color:#14532F}
+.st.todo{background:var(--paper-2);color:var(--ink-soft)}
+.st.on{background:#FDE8E9;color:#B4232B}
+.warn{display:block;margin-top:3px;font-size:12px;color:var(--warn);font-weight:600}
+
+/* organizer */
+.ogrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:18px}
+.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.olist{list-style:none;padding:0;margin:0;display:grid;gap:6px;max-height:460px;overflow:auto}
+.olist li{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:14px}
+.olist li .c{color:var(--ink-soft);font-size:12px;overflow-wrap:anywhere}
+.olist li .grow{flex:1;min-width:0}
+.heat{min-width:0}
+.heat td,.heat th{text-align:center;padding:8px}
+.heat td:first-child,.heat th:first-child{text-align:left}
+.heat .n{display:inline-block;min-width:30px;border-radius:6px;padding:3px 6px;font-weight:700}
+
+/* modal */
+.ov{position:fixed;inset:0;background:rgba(40,8,14,.6);display:grid;place-items:center;z-index:20;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.modal{background:var(--paper);color:var(--ink);border-radius:18px;padding:22px;width:min(480px,100%);max-height:100%;overflow:auto;box-sizing:border-box}
+.modal h3{font-size:22px}
+.setgrid{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:8px 10px;align-items:center;margin:14px 0}
+.setgrid input{text-align:center;padding:9px 6px}
+.vs{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;margin-top:12px;font-weight:700}
+.vs span:nth-child(2){color:var(--red);font-family:var(--f-display)}
+.vs span:last-child{text-align:right}
+.kv3{display:grid;grid-template-columns:1.4fr 1fr .8fr;gap:10px}
+
+@media (max-width:820px){
+  .hero{grid-template-columns:1fr}
+  .where{text-align:left}
+  .grid2{grid-template-columns:1fr}
+  .finder{grid-template-columns:1fr}
+}
+@media (max-width:480px){
+  .choices.three{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .kv3{grid-template-columns:1fr 1fr}
+}
+/* ---------- phone ---------- */
+.bnav{display:none}
+.bmob{display:none}
+.rchips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;margin-bottom:10px;scroll-snap-type:x proximity;scrollbar-width:none}
+.rchips::-webkit-scrollbar{display:none}
+.rchip{flex:none;scroll-snap-align:start;border:1.5px solid var(--red-line);background:transparent;color:var(--on-red);border-radius:12px;padding:8px 12px;text-align:left;font-weight:700;font-size:14px;cursor:pointer;position:relative}
+.rchip small{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--on-red-soft);font-weight:700}
+.rchip.on{background:var(--yellow);color:var(--yellow-ink);border-color:var(--yellow)}
+.rchip.on small{color:var(--yellow-ink)}
+.rchip.has-me::after{content:"";position:absolute;top:7px;right:7px;width:8px;height:8px;border-radius:50%;background:var(--yellow);box-shadow:0 0 0 2px var(--red)}
+.rchip.on.has-me::after{background:var(--red);box-shadow:0 0 0 2px var(--yellow)}
+.mhead{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:2px 10px;color:var(--on-red-soft);font-size:13px;margin:0 0 8px}
+.mhead b{color:var(--on-red);font-family:var(--f-display);font-size:18px}
+.mlist{display:grid;gap:10px}
+@media (max-width:640px){
+  body{font-size:15px}
+  .wrap{padding-block:16px calc(92px + env(safe-area-inset-bottom,0px))}
+  .hero{gap:10px;padding-bottom:14px}
+  .hero h1{font-size:36px}
+  .hero .tag{font-size:16px;margin-top:10px}
+  .where{display:flex;gap:6px;align-items:baseline;font-size:13px}
+  .where strong{display:inline;font-size:15px}
+  .days{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:8px;margin-top:14px;padding-bottom:4px;scrollbar-width:none}
+  .days::-webkit-scrollbar{display:none}
+  .day{flex:0 0 auto;min-width:140px;scroll-snap-align:start;padding:10px 12px}
+  .facts{font-size:13px;gap:4px 14px;margin-top:12px}
+  .tabs{display:none}
+  .bnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:15;gap:4px;background:var(--red-ink);border-top:1px solid var(--red-line);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+  .bnav a{flex:1;min-width:0;display:grid;justify-items:center;gap:2px;font-size:11px;font-weight:600;color:var(--on-red-soft);text-decoration:none;padding:7px 0 6px;border-radius:12px}
+  .bnav a svg{width:22px;height:22px}
+  .bnav a[aria-current="page"]{color:var(--yellow-ink);background:var(--yellow)}
+  .view{margin-top:16px}
+  .card{padding:18px;border-radius:14px}
+  .card h2{font-size:23px}
+  .panel{padding:16px}
+  input[type=text],input[type=email],input[type=time],input[type=date],input[type=number],input[type=datetime-local],select,textarea{font-size:16px}
+  .choice{padding:12px}
+  .iconpick{grid-template-columns:1fr;justify-items:start}
+  .regsub{position:sticky;bottom:calc(72px + env(safe-area-inset-bottom,0px));z-index:2;background:var(--paper);padding:10px 0 2px;margin-top:4px}
+  .regsub .btn{flex:1}
+  .finder{padding:14px;border-radius:14px}
+  .bdesk{display:none}
+  .bmob{display:block}
+  .bmob .sd{padding:9px 12px}
+  .bmob .m-head{padding:8px 12px 4px}
+  .sched h3{font-size:18px}
+  .sched table{min-width:0}
+  .sched thead{display:none}
+  .sched tbody{display:block}
+  .sched tr.slot{display:block}
+  .sched tr.slot td{display:block}
+  .sched tr.click{display:grid;grid-template-columns:58px minmax(0,1fr);column-gap:10px;row-gap:2px;padding:11px 14px;border-top:1px solid var(--line)}
+  .sched tr.click td{border:0;padding:0;background:transparent}
+  .sched tr.click td:nth-child(1){grid-column:1;grid-row:1;font-size:15px}
+  .sched tr.click td:nth-child(2){grid-column:1;grid-row:2;font-size:12px;color:var(--ink-soft)}
+  .sched tr.click td:nth-child(3){grid-column:2;grid-row:1;font-size:12px}
+  .sched tr.click td:nth-child(4){grid-column:2;grid-row:2;font-weight:600}
+  .sched tr.click td:nth-child(5){grid-column:2;grid-row:3;margin-top:5px}
+  .sched tr.me{background:#FFF7D6}
+  .ov{align-items:end;padding:0}
+  .modal{width:100%;border-radius:20px 20px 0 0;max-height:88vh;padding:20px max(18px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(18px,env(safe-area-inset-left,0px))}
+  .modal::before{content:"";display:block;width:40px;height:4px;border-radius:2px;background:var(--line);margin:-6px auto 14px}
+  .prof .big .av{--s:108px}
+  .prof .big .noicon{width:108px;height:108px;font-size:40px}
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .kvl{grid-template-columns:1fr;gap:2px}
+  .kvl dd{margin-bottom:8px}
+}
+@media (max-width:640px){
+  body:not([data-view="inscription"]) .hero .tag,
+  body:not([data-view="inscription"]) .hero .where,
+  body:not([data-view="inscription"]) .days,
+  body:not([data-view="inscription"]) .facts{display:none}
+  body:not([data-view="inscription"]) .hero{padding-bottom:10px}
+  body:not([data-view="inscription"]) .hero h1{font-size:26px}
+  body:not([data-view="inscription"]) .hero .eyebrow{font-size:10px}
+}
+
+.hscroll{position:relative}
+.hs-arrow,.hs-hint{display:none}
+@media (max-width:640px){
+  .hs-hint{display:block;margin-top:14px;font-size:12px;font-weight:600;color:var(--on-red-soft)}
+  .hs-hint span{display:inline-block;color:var(--yellow);animation:nudge 1.4s ease-in-out infinite}
+  .hscroll .days,.hscroll .rchips{margin-top:6px}
+  .hs-arrow{display:grid;place-items:center;position:absolute;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;border:0;background:var(--yellow);color:var(--yellow-ink);font-size:24px;font-weight:800;line-height:1;padding:0 0 3px;box-shadow:0 2px 10px rgba(40,8,14,.45);cursor:pointer;z-index:3}
+  .hs-arrow.r{right:-6px}
+  .hs-arrow.l{left:-6px}
+  .hscroll .rchips + .hs-arrow, .hscroll .rchips ~ .hs-arrow{top:calc(50% - 4px)}
+  body:not([data-view="inscription"]) .hs-hint{display:none}
+}
+@keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
+@media (prefers-reduced-motion:reduce){.hs-hint span{animation:none}}
+.gbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--paper);color:var(--ink);border:1.5px solid var(--line);font-weight:700;padding:12px 16px}
+.gbtn:hover{background:var(--paper-2)}
+.orsep{display:flex;align-items:center;gap:12px;margin:18px 0 14px;color:var(--ink-soft);font-size:13px}
+.orsep::before,.orsep::after{content:"";flex:1;height:1px;background:var(--line)}
+.pend{color:var(--warn);font-weight:700}
+.cont{color:#B4232B;font-weight:700}
+.repbox{border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:12px;font-size:14px}
+.repbox b{font-weight:700}
+.steps{display:grid;gap:8px;margin:12px 0}
+.srow{display:grid;grid-template-columns:76px minmax(0,1fr) 14px minmax(0,1fr);gap:8px;align-items:center}
+.srow input{text-align:center;padding:10px 6px;font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+.srow .slab{font-weight:700;font-size:14px}
+.shead span{font-size:12px;font-weight:700;color:var(--ink-soft);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ssum{border-radius:10px;padding:10px 12px;background:var(--paper-2);font-size:14px}
+.ssum.win{background:#E5F4EC;color:#14532F;font-size:16px}
+.ssum.err{background:#FDE8E9;color:#8A1C24}
+.repbox .row{margin-top:10px}
+.scorehow{background:var(--yellow);color:var(--yellow-ink);border-radius:14px;padding:12px 16px;margin-bottom:16px;font-size:14px}
+.scorehow ol{margin:6px 0 4px;padding-left:20px;display:grid;gap:2px}
+.scorehow span{font-size:13px;opacity:.85}
+</style>
+<!-- Firebase (servi par Firebase Hosting : aucune clé à copier) -->
+<script src="/__/firebase/10.12.2/firebase-app-compat.js"></script>
+<script src="/__/firebase/10.12.2/firebase-auth-compat.js"></script>
+<script src="/__/firebase/10.12.2/firebase-firestore-compat.js"></script>
+<script src="/__/firebase/init.js"></script>
+<script>
+/* Courriels qui ont accès à l'onglet Organisateur (le courriel doit être confirmé) */
+window.ADMIN_EMAILS = ["bartolomeovictor@gmail.com"];
+</script>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <div class="eyebrow">Club de ping-pong · Édition 2</div>
+      <h1>Ping Pong Tournoi #2</h1>
+      <p class="tag" id="placesDispo">Il y a 24 places dispo</p>
+    </div>
+    <div class="where"><strong>ÉTS, Pavillon F</strong>Au Garage</div>
+  </header>
+
+  <div class="hs-hint">Glisse pour voir les 6 journées de match <span aria-hidden="true">→</span></div>
+  <div class="hscroll"><div class="days" id="days"></div><button class="hs-arrow l" type="button" aria-label="Journées précédentes" hidden>‹</button><button class="hs-arrow r" type="button" aria-label="Journées suivantes" hidden>›</button></div>
+
+  <nav class="tabs" aria-label="Sections">
+    <a href="#inscription" data-v="inscription">Inscription</a>
+    <a href="#tableau" data-v="tableau">Tableau en direct</a>
+    <a href="#horaire" data-v="horaire">Horaire</a>
+    <a href="#profil" data-v="profil">Mon profil</a>
+    <a href="#orga" data-v="orga" id="tabOrga" hidden>Organisateur</a>
+  </nav>
+
+  <!-- INSCRIPTION -->
+  <section class="view" id="v-inscription">
+    <div class="grid2">
+      <div class="card" id="formCard">
+        <h2>Inscription</h2>
+        <p class="sub">Une minute. Dis-nous quand tu peux jouer : on place les matchs selon les disponibilités. Inscriptions jusqu'au mercredi 4 novembre, 23 h 59.</p>
+        <div id="formArea"></div>
+      </div>
+      <aside class="panel">
+        <div class="side-h"><h3>Joueurs</h3><span id="placesTxt"></span></div>
+        <ul class="plist" id="plist"></ul>
+        <ul class="rules">
+          <li><b>Meilleur de 3.</b> Chaque match se joue en 2 sets gagnants de 11 points, 2 points d'écart.</li>
+          <li><b>Deux défaites et tu sors.</b> Ta première défaite, peu importe le tour, t'envoie dans le tableau des perdants.</li>
+          <li><b>Grande finale le dernier jeudi.</b> Si le finaliste des perdants gagne, on rejoue un match décisif.</li>
+          <li><b>Pas de qualifications.</b> Tout le monde entre dans le même tableau. Perdre ton 1er match t'envoie chez les perdants, pas à la maison.</li>
+          <li><b>Aucune place réservée.</b> Les anciens du Tournoi #1 doivent s'inscrire comme tout le monde. Pas de tirage au sort : les 8 premiers inscrits commencent directement en 8es, les 16 suivants jouent le 1er tour.</li>
+          <li><b>Pourquoi 24 places ?</b> Une seule table, deux créneaux par jour : 24 joueurs donnent environ 47 matchs pour 54 places de match en 6 jours. Assez de marge pour les retards, sans dépasser 17 h. Les suivants vont en liste d'attente et remplacent les désistements.</li>
+          <li><b>Le score s'entre à la table, tout de suite après le match.</b> Le gagnant ouvre le match dans le Tableau et entre le score ; le perdant le confirme sur son téléphone avant de partir. 30 secondes, et le prochain match est connu. En cas de désaccord, l'organisateur tranche.</li>
+          <li><b>Une seule table, ça roule vite.</b> Sois là 10 min avant ton heure. 5 min de retard = forfait.</li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+  <!-- TABLEAU -->
+  <section class="view" id="v-tableau" hidden>
+    <div class="finder">
+      <div><label for="who">Trouve ton nom</label><select id="who"></select></div>
+      <div class="mine" id="mine">Choisis ton nom pour voir ton prochain match, le jour, l'heure et la table.</div>
+    </div>
+    <div id="bracketArea"></div>
+  </section>
+
+  <!-- HORAIRE -->
+  <section class="view" id="v-horaire" hidden>
+    <div id="schedArea"></div>
+  </section>
+
+  <!-- PROFIL -->
+  <section class="view" id="v-profil" hidden>
+    <div id="profArea"></div>
+  </section>
+
+  <!-- ORGA -->
+  <section class="view" id="v-orga" hidden>
+    <div class="ogrid">
+      <div class="card">
+        <h2>Tableau</h2>
+        <p class="sub" id="lockTxt"></p>
+        <div class="row" id="lockBtns"></div>
+        <div id="orgMsg"></div>
+      </div>
+      <div class="card">
+        <h2>Arbitres</h2>
+        <p class="sub">Les arbitres confirment ou modifient les scores de tous les matchs. Une personne le demande dans « Mon profil », tu l'approuves ici.</p>
+        <ul class="olist" id="arbList"></ul>
+      </div>
+      <div class="card">
+        <h2>Scores à vérifier</h2>
+        <p class="sub">Scores entrés par les joueurs. Un score compte tout de suite et devient officiel quand l'adversaire le confirme.</p>
+        <ul class="olist" id="verifList"></ul>
+      </div>
+      <div class="card">
+        <h2>Disponibilités</h2>
+        <p class="sub">Nombre d'inscrits disponibles par jour et par créneau.</p>
+        <div class="tablewrap" id="heat"></div>
+      </div>
+      <div class="card">
+        <h2>Inscrits</h2>
+        <p class="sub">Contacts visibles seulement par toi et les éditeurs.</p>
+        <form id="addForm" class="row" style="margin-bottom:12px">
+          <input type="text" id="addName" placeholder="Ajouter un joueur sur place" style="flex:1;min-width:0">
+          <button class="btn sm" type="submit">Ajouter</button>
+        </form>
+        <ul class="olist" id="olist"></ul>
+      </div>
+      <div class="card">
+        <h2>Paramètres</h2>
+        <p class="sub">L'horaire se recalcule tout seul quand tu enregistres.</p>
+        <form id="cfgForm">
+          <div class="field"><label for="c_jours">Journées de match (une date par ligne, AAAA-MM-JJ)</label><textarea id="c_jours" rows="6"></textarea></div>
+          <div class="field"><label for="c_cr">Créneaux (début-fin | libellé)</label><textarea id="c_cr" rows="3"></textarea></div>
+          <div class="kv">
+            <div class="field"><label for="c_t">Tables</label><input type="number" min="1" max="12" id="c_t"></div>
+            <div class="field"><label for="c_d">Minutes par match</label><input type="number" min="5" max="90" id="c_d"></div>
+            <div class="field"><label for="c_cap">Inscriptions max</label><input type="number" min="2" max="200" id="c_cap"></div>
+            <div class="field"><label for="c_lim">Fin des inscriptions</label><input type="datetime-local" id="c_lim"></div>
+            <div class="field"><label for="c_est">Estimation joueurs (aperçu)</label><input type="number" min="0" max="256" id="c_est"></div>
+          </div>
+          <div class="field"><label for="c_anc">Top 8 du Tournoi #1 (têtes de série seulement s'ils s'inscrivent ; un par ligne : rang, nom)</label><textarea id="c_anc" rows="8"></textarea></div>
+          <button class="btn" type="submit">Enregistrer</button>
+          <div id="cfgMsg"></div>
+        </form>
+      </div>
+    </div>
+  </section>
+</div>
+
+<nav class="bnav" aria-label="Sections">
+  <a href="#inscription" data-v="inscription"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg><span>Inscription</span></a>
+  <a href="#tableau" data-v="tableau"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h5v4H3zM3 15h5v4H3zM8 7h3v10H8M11 12h4"/><path d="M15 9h6v6h-6z"/></svg><span>Tableau</span></a>
+  <a href="#horaire" data-v="horaire"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Horaire</span></a>
+  <a href="#profil" data-v="profil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg><span>Profil</span></a>
+  <a href="#orga" data-v="orga" id="bnOrga" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Orga</span></a>
+</nav>
+
+<div class="ov" id="ov" hidden><div class="modal" id="modal" role="dialog" aria-modal="true"></div></div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const DEF={jours:['2026-11-05','2026-11-06','2026-11-09','2026-11-10','2026-11-11','2026-11-12'],creneaux:[{h:'12:00',fin:'13:00',lab:'12 h – 13 h'},{h:'15:00',fin:'17:00',lab:'15 h – 17 h'}],tables:1,duree:20,parCreneau:2,capacite:24,estimation:24,limite:'2026-11-04T23:59',anciens:[],verrou:false,seeds:null};
+const S={arb:{},rapports:{},db:null,user:null,me:null,admin:false,insc:[],contacts:{},matchs:{},cfg:norm({}),loaded:false,editing:false,armed:null};
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+function norm(c){const o=Object.assign({},DEF,c||{});if(!Array.isArray(o.jours)||!o.jours.length)o.jours=DEF.jours.slice();if(!Array.isArray(o.creneaux)||!o.creneaux.length)o.creneaux=DEF.creneaux.slice();return o}
+
+/* ---------- dates & times ---------- */
+const MOIS=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+const MC=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+const JL=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+const JC=['dim','lun','mar','mer','jeu','ven','sam'];
+function dp(s){const [y,m,d]=(s||'').split('-').map(Number);const dt=new Date(y||2026,(m||1)-1,d||1);return {d:d||1,m:MOIS[(m||1)-1],mc:MC[(m||1)-1],wd:JC[dt.getDay()],wl:JL[dt.getDay()]}}
+const dayShort=s=>{const x=dp(s);return x.wd+' '+x.d+' '+x.mc};
+const dayLong=s=>{const x=dp(s);return x.wl+' '+x.d+' '+x.m};
+const toMin=h=>{const [a,b]=(h||'12:00').split(':').map(Number);return a*60+(b||0)};
+const fmt=m=>Math.floor(m/60)+' h '+String(m%60).padStart(2,'0');
+
+/* ---------- players ---------- */
+function sortedInsc(){return S.insc.slice().sort((a,b)=>(a.createdAt||0)-(b.createdAt||0))}
+function inscById(id){return S.insc.find(x=>x.id===id)}
+const normN=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+function rangOf(nom){const n=normN(nom),f=n.split(/\s+/)[0];const a=(S.cfg.anciens||[]).find(a=>{const an=normN(a.nom);return an===n||an===f});return a?a:null}
+// registered players → seeded list: registered top-8 of Tournoi #1 first (by rank), then everyone else (registration order, or shuffled at the draw)
+function seedList(ins,shuffle){
+  const top=[],rest=[];
+  for(const x of ins){const a=rangOf(x.nom);(a?top:rest).push(a?{id:x.id,nom:x.nom,ancien:true,rang:a.rang}:{id:x.id,nom:x.nom})}
+  top.sort((p,q)=>(+p.rang||99)-(+q.rang||99));
+  if(shuffle)for(let i=rest.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[rest[i],rest[j]]=[rest[j],rest[i]]}
+  return top.concat(rest);
+}
+function players(){
+  const c=S.cfg;
+  if(c.verrou&&Array.isArray(c.seeds))return c.seeds.map(s=>Object.assign({},s));
+  // preview = registration order (no draw): the first registered fill the top seeds, which start in round 2 when the bracket is not full
+  const real=seedList(sortedInsc().slice(0,c.capacite||24),false);
+  const n=Math.max(real.length,+c.estimation||0);
+  for(let i=real.length;i<n;i++)real.push({id:'est_'+i,nom:'Place libre',placeholder:true});
+  return real;
+}
+
+/* ---------- double elimination structure ---------- */
+function seedOrder(N){let a=[1,2];while(a.length<N){const L=a.length*2,n=[];for(const s of a)n.push(s,L+1-s);a=n}return a.slice(0,N)}
+function build(pl){
+  const n=pl.length;if(n<2)return null;
+  const k=Math.max(1,Math.ceil(Math.log2(n))),N=2**k,M={},order=[];
+  const add=(id,br,r,i,A,B,lab)=>(M[id]={id,br,r,i,A,B,lab});
+  const so=seedOrder(N);
+  const wbName=r=>{const left=k-r;return left===0?'Finale gagnants':left===1?'Demi-finales':left===2?'Quarts':left===3?'8es':'Tour '+r};
+  for(let r=1;r<=k;r++){const c=N/2**r;for(let i=0;i<c;i++){
+    const A=r===1?{s:so[2*i]-1}:{w:'G'+(r-1)+'-'+(2*i+1)},B=r===1?{s:so[2*i+1]-1}:{w:'G'+(r-1)+'-'+(2*i+2)};
+    add('G'+r+'-'+(i+1),'W',r,i,A,B,wbName(r));}}
+  const LR=k>=2?2*(k-1):0;
+  if(k>=2){
+    for(let i=0;i<N/4;i++)add('P1-'+(i+1),'L',1,i,{l:'G1-'+(2*i+1)},{l:'G1-'+(2*i+2)});
+    for(let j=1;j<=k-1;j++){
+      const r=2*j,c=N/2**(j+1);
+      for(let i=0;i<c;i++){const idx=(j%2)?c-1-i:i;add('P'+r+'-'+(i+1),'L',r,i,{w:'P'+(r-1)+'-'+(i+1)},{l:'G'+(j+1)+'-'+(idx+1)})}
+      if(j<k-1){const r2=2*j+1,c2=N/2**(j+2);for(let i=0;i<c2;i++)add('P'+r2+'-'+(i+1),'L',r2,i,{w:'P'+r+'-'+(2*i+1)},{w:'P'+r+'-'+(2*i+2)})}
+    }
+  }
+  add('F1','F',1,0,{w:'G'+k+'-1'},LR?{w:'P'+LR+'-1'}:{l:'G1-1'},'Grande finale');
+  add('F2','F',2,0,{w:'F1',a:1},{w:'F1',b:1},'Match décisif');
+  for(const m of Object.values(M))if(m.br==='L')m.lab=(m.r===LR?'Finale perdants':'Perdants · tour '+m.r);
+  const waves=[['W',1],['L',1],['W',2],['L',2]];
+  for(let r=3;r<=k;r++)waves.push(['W',r],['L',2*r-3],['L',2*r-2]);
+  for(const [br,r] of waves)for(const m of Object.values(M))if(m.br===br&&m.r===r)order.push(m);
+  order.push(M.F1,M.F2);
+  return {M,order,k,N,n,LR,pl};
+}
+function hasScore(r){return !!(r&&(r.forfait||(Array.isArray(r.sets)&&r.sets.length)))}
+function reportOf(pid,id){const x=pid&&S.rapports[pid];return x&&hasScore(x[id])?x[id]:null}
+function effRes(id,pa,pb){
+  const adm=S.matchs[id];if(hasScore(adm))return {r:adm,src:'admin'};
+  const rf=refReport(id);if(rf)return {r:rf.rep,src:'arbitre',refBy:rf.by};
+  const ra=reportOf(pa&&pa.id,id),rb=reportOf(pb&&pb.id,id);
+  if(ra&&rb){const wa=winnerOfR(ra),wb=winnerOfR(rb);return wa&&wa===wb?{r:ra,src:'confirme',ra,rb}:{r:null,src:'conteste',ra,rb}}
+  if(ra)return {r:ra,src:'attente',by:pa,other:pb,ra};
+  if(rb)return {r:rb,src:'attente',by:pb,other:pa,rb};
+  return {r:null,src:null};
+}
+function isRef(){return !!(S.me&&(S.cfg.arbitres||[]).includes(S.me))}
+function refReport(id){let best=null,by=null;for(const u of (S.cfg.arbitres||[])){const x=reportOf(u,id);if(x&&(!best||(x.at||0)>(best.at||0))){best=x;by=u}}return best?{rep:best,by}:null}
+function effR(id){const o=VIEW&&VIEW.R&&VIEW.R[id];return o&&o.eff?o.eff.r:S.matchs[id]}
+function winnerOf(id,res){return winnerOfR(res[id])}
+function winnerOfR(r){
+  if(!r)return 0;
+  if(r.forfait==='A')return 2;if(r.forfait==='B')return 1;
+  let a=0,b=0;for(const s of(r.sets||[])){const x=+s[0],y=+s[1];if(isNaN(x)||isNaN(y)||x===y)continue;x>y?a++:b++}
+  return a>=2?1:b>=2?2:0;
+}
+function resolveAll(B,res){
+  const memo={};
+  const side=src=>{
+    if(src.s!=null)return src.s<B.n?{st:'ok',p:B.pl[src.s]}:{st:'bye'};
+    const id=src.w||src.l,m=get(id);
+    if(id==='F1'&&(src.a||src.b)){if(m.st!=='done')return {st:'pend',lab:'Si nécessaire'};if(m.win!==2)return {st:'bye'};return {st:'ok',p:src.a?m.pa:m.pb}}
+    if(src.w){if(m.st==='void')return {st:'bye'};if(m.st==='done'||m.st==='wo')return {st:'ok',p:m.winner};return {st:'pend',lab:'Gagnant '+id}}
+    if(m.st==='void'||m.st==='wo'||m.struct)return {st:'bye'};
+    if(m.st==='done')return {st:'ok',p:m.loser};
+    return {st:'pend',lab:'Perdant '+id};
+  };
+  function get(id){
+    if(memo[id])return memo[id];
+    const m=B.M[id],a=side(m.A),b=side(m.B),o={m,a,b,pa:a.p,pb:b.p,st:'pend',struct:false};
+    if(a.st==='bye'&&b.st==='bye')o.st='void';
+    else if(a.st==='bye'||b.st==='bye'){o.struct=true;const s=a.st==='bye'?b:a;if(s.st==='ok'){o.st='wo';o.winner=s.p}}
+    else if(a.st==='ok'&&b.st==='ok'){const e=res===S.matchs?effRes(id,a.p,b.p):{r:res[id],src:res[id]?'admin':null};o.eff=e;const w=winnerOfR(e.r);if(w){o.st='done';o.win=w;o.winner=w===1?a.p:b.p;o.loser=w===1?b.p:a.p}else o.st=res[id]&&res[id].live?'live':'ready'}
+    return memo[id]=o;
+  }
+  for(const id in B.M)get(id);
+  return memo;
+}
+function structural(B){
+  const memo={};
+  const empty=src=>{if(src.s!=null)return src.s>=B.n;const id=src.w||src.l;if(id==='F1'&&(src.a||src.b))return false;const e=g(id);return src.w?e.void:(e.void||e.wo)};
+  function g(id){if(memo[id])return memo[id];const m=B.M[id],ea=empty(m.A),eb=empty(m.B);return memo[id]={void:ea&&eb,wo:ea!==eb}}
+  for(const id in B.M)g(id);return memo;
+}
+
+/* ---------- schedule: waves spread over the match days, 3 créneaux per day ---------- */
+function schedule(B){
+  const st=structural(B),c=S.cfg,J=c.jours,D=J.length,CR=c.creneaux,T=Math.max(1,+c.tables||1),DUR=Math.max(5,+c.duree||20),CAPS=CR.map(x=>x.fin?Math.max(1,Math.floor((toMin(x.fin)-toMin(x.h))/DUR))*T:T*Math.max(1,+c.parCreneau||2));
+  const waves=[];let cur=null;
+  for(const m of B.order){if(st[m.id].void||st[m.id].wo)continue;const key=m.br==='F'?'F':m.br+m.r;if(!cur||cur.key!==key){cur={key,ms:[]};waves.push(cur)}cur.ms.push(m)}
+  let fi=waves.findIndex(w=>w.key==='W'+B.k);if(fi<0)fi=Math.max(0,waves.length-1);if(D===1)fi=0;
+  const pre=waves.slice(0,fi),preDays=D-1,total=pre.reduce((s,w)=>s+w.ms.length,0),target=preDays?total/preDays:0;
+  // spread the matches evenly over the days before the finals (a round may continue the next day)
+  const dayOf={};
+  // every day — the last Thursday included — takes its share of matches; the finals come on top of the last day's share
+  const finals=waves.slice(fi).reduce((s,w)=>s+w.ms.length,0),quota=Math.max(1,Math.ceil((total+finals)/Math.max(1,D)));let d=0,acc=0;
+  for(const w of pre)for(const m of w.ms){if(acc>=quota&&d<D-1){d++;acc=0}dayOf[m.id]=d;acc++}
+  for(const w of waves.slice(fi))for(const m of w.ms)dayOf[m.id]=D-1;
+  // players already known before any result (seeds) — used to honour their preferred times
+  const R0=resolveAll(B,{});
+  const prefOK=(p,h)=>{if(!p||p.ancien)return true;const x=inscById(p.id);return !x||!Array.isArray(x.heures)||!x.heures.length||x.heures.includes(h)};
+  const free={},count={},plan={},end={};
+  const tablesOf=(dd,s)=>{const k=dd+'_'+s;if(!free[k]){free[k]=Array(T).fill(toMin(CR[s].h));count[k]=0}return k};
+  for(const w of waves)for(const m of w.ms){
+    const dd=dayOf[m.id];let minS=0,feedEnd=0;
+    const feeders=[m.A.w||m.A.l,m.B.w||m.B.l].filter(Boolean);
+    for(const f of feeders){const p=plan[f];if(p&&p.day===dd){minS=Math.max(minS,p.slot+1);feedEnd=Math.max(feedEnd,end[f])}}
+    if(minS>=CR.length)minS=CR.length-1;
+    const o=R0[m.id];let pick=-1,first=-1;
+    for(let s=minS;s<CR.length;s++){const k=tablesOf(dd,s);if(count[k]>=CAPS[s])continue;if(first<0)first=s;if(prefOK(o.a.p,CR[s].h)&&prefOK(o.b.p,CR[s].h)){pick=s;break}}
+    if(pick<0)pick=first>=0?first:CR.length-1;
+    const k=tablesOf(dd,pick);let t=0;for(let i=1;i<T;i++)if(free[k][i]<free[k][t])t=i;
+    const at=Math.max(free[k][t],feedEnd);free[k][t]=at+DUR;count[k]++;end[m.id]=at+DUR;
+    const fin=CR[pick].fin?toMin(CR[pick].fin):Infinity;
+    plan[m.id]={day:dd,slot:pick,min:at,table:t+1,over:at+DUR>fin};
+  }
+  const capDay=CAPS.reduce((a,b)=>a+b,0);
+  return {plan,st,waves,capDay,capTotal:capDay*D};
+}
+
+/* ---------- derived snapshot ---------- */
+let VIEW=null;
+function derive(){
+  const pl=players(),B=build(pl);
+  if(!B){VIEW=null;return}
+  const R=resolveAll(B,S.matchs),{plan,st,waves,capDay,capTotal}=schedule(B),J=S.cfg.jours;
+  for(const id in plan){const r=S.matchs[id];if(!r)continue;const p=Object.assign({},plan[id]);
+    if(r.jour&&J.includes(r.jour))p.day=J.indexOf(r.jour);
+    if(r.heure)p.min=toMin(r.heure);
+    if(r.table)p.table=+r.table;
+    if(r.jour||r.heure){let s=0;S.cfg.creneaux.forEach((c,i)=>{if(p.min>=toMin(c.h))s=i});p.slot=s}
+    plan[id]=p}
+  VIEW={B,R,plan,st,pl,waves,capDay,capTotal};
+}
+function when(id,short){const p=VIEW.plan[id];if(!p)return '';const ds=S.cfg.jours[p.day];return (short?dayShort(ds):dayLong(ds))+' · '+fmt(p.min)+' · T'+p.table}
+function setsTxt(id){const r=effR(id);if(!r)return '';if(r.forfait)return 'Forfait';return (r.sets||[]).map(s=>s[0]+'-'+s[1]).join(' · ')}
+function setCount(id){const r=effR(id);let a=0,b=0;if(!r)return ['',''];if(r.forfait)return r.forfait==='A'?['F','2']:['2','F'];for(const s of r.sets||[]){const x=+s[0],y=+s[1];if(isNaN(x)||isNaN(y)||x===y)continue;x>y?a++:b++}return [a,b]}
+function dispoIssues(id){
+  const o=VIEW.R[id],p=VIEW.plan[id],ds=S.cfg.jours[p.day],h=(S.cfg.creneaux[p.slot]||{}).h,out=[];
+  for(const s of [o.a,o.b]){if(s.st!=='ok'||s.p.ancien)continue;const x=inscById(s.p.id);if(!x)continue;
+    if(Array.isArray(x.jours)&&x.jours.length&&!x.jours.includes(ds))out.push(s.p.nom+' pas dispo ce jour');
+    else if(Array.isArray(x.heures)&&x.heures.length&&h&&!x.heures.includes(h))out.push(s.p.nom+' préfère un autre créneau')}
+  return out;
+}
+
+/* ---------- views ---------- */
+function setView(force){
+  if(force)forcedView=force;
+  let v=forcedView||(location.hash||'#inscription').slice(1);
+  if(!['inscription','tableau','horaire','profil','orga'].includes(v))v='inscription';
+  if(v==='orga'&&!S.admin)v='inscription';
+  document.querySelectorAll('.view').forEach(s=>s.hidden=s.id!=='v-'+v);
+  document.body.setAttribute('data-view',v);requestAnimationFrame(updateArrows);
+  document.querySelectorAll('.tabs a, .bnav a').forEach(a=>{if(a.dataset.v===v)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+}
+window.addEventListener('hashchange',()=>{forcedView=null;setView()});
+// tabs work even where the hash can't change (file preview, embedded viewers)
+let forcedView=null;
+document.querySelectorAll('.tabs a, .bnav a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();window.scrollTo({top:0});forcedView=a.dataset.v;try{history.replaceState(null,'','#'+a.dataset.v)}catch(_){}setView(a.dataset.v)}));
+document.addEventListener('click',e=>{const a=e.target.closest('a[href^="#"]');if(a&&!a.closest('.tabs')&&!a.closest('.bnav')){e.preventDefault();forcedView=a.getAttribute('href').slice(1);try{history.replaceState(null,'',a.getAttribute('href'))}catch(_){}setView(forcedView)}});
+
+function renderHero(){
+  const c=S.cfg,J=c.jours,last=J.length-1;
+  const perDay=J.map(()=>0);
+  if(VIEW)for(const id in VIEW.plan){if(id==='F2')continue;perDay[VIEW.plan[id].day]++}
+  $('#days').innerHTML=J.map((ds,i)=>{const x=dp(ds);
+    const title=i===last?'Jour '+(i+1)+' · finales':'Jour '+(i+1);
+    const sub=VIEW?perDay[i]+' matchs'+(i===last?' dont la finale':''):(i===last?'Matchs + finale':'Matchs du tableau');
+    return '<div class="day'+(i===last?' final':'')+'"><div class="d"><small>'+x.wd+'</small><span>'+x.d+'</span></div><div><b>'+title+'</b><p>'+sub+'</p></div></div>'}).join('');
+  const rest=Math.max(0,c.capacite-Math.min(S.insc.length,c.capacite));
+  $('#placesDispo').innerHTML=rest>1?'Il y a <b>'+rest+'</b> places dispo':rest===1?'Il reste <b>1</b> place dispo':'Complet · <b>liste d\'attente</b> ouverte';
+}
+
+const COH=[['1','1re année','Nouvelle cohorte'],['2','2e année','Cohorte précédente']];
+const NIV=[['decouvre','Je découvre'],['regulier','Je joue de temps en temps'],['smash','Je suis expérimenté·e']];
+const cohLab=v=>(COH.find(c=>c[0]===String(v))||[])[1]||'';
+
+/* ---------- icons ---------- */
+const PAL=[['#A3303F','#F6CF4A'],['#1F5F8B','#F4E9D8'],['#2E7D5B','#FFE07A'],['#5B3FA0','#FFB4A2'],['#D9572B','#FFF1C9'],['#0F766E','#FDE68A'],['#7C2D12','#FCD9B6'],['#1E3A8A','#9CC8FF']];
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function genSvg(seed){
+  seed=Math.abs(+seed|0);const r=rng(seed),[bg,fg]=PAL[seed%PAL.length],ang=Math.round(r()*360),bx=(14+r()*36).toFixed(1),by=(10+r()*14).toFixed(1),dots=Math.floor(r()*3);
+  let pips='';for(let i=0;i<dots+2;i++){pips+='<circle cx="'+(24+i*6)+'" cy="'+(24+(i%2)*5)+'" r="1.6" fill="'+bg+'" opacity=".35"/>'}
+  return '<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="64" height="64" fill="'+bg+'"/><g transform="rotate('+ang+' 32 32)"><rect x="29" y="38" width="6" height="19" rx="3" fill="'+fg+'"/><circle cx="32" cy="27" r="15" fill="'+fg+'"/>'+pips+'</g><circle cx="'+bx+'" cy="'+by+'" r="5" fill="#fff"/></svg>';
+}
+const IMG_OK=/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/;
+function iconInner(ic){if(!ic)return '';if(ic.t==='img'&&IMG_OK.test(ic.src||''))return '<img src="'+ic.src+'" alt="">';if(ic.t==='gen')return genSvg(ic.seed);return ''}
+function avatarHtml(id,size){const x=id&&inscById(id),inner=x?iconInner(x.icone):'';return '<span class="av'+(inner?'':' none')+'" style="--s:'+(size||24)+'px">'+inner+'</span>'}
+function fileToAvatar(file){return new Promise((res,rej)=>{if(!file||!/^image\//.test(file.type))return rej(new Error('type'));const fr=new FileReader();fr.onerror=rej;fr.onload=()=>{const im=new Image();im.onerror=rej;im.onload=()=>{const Z=160,cv=document.createElement('canvas');cv.width=cv.height=Z;const k=Math.min(im.width,im.height),ctx=cv.getContext('2d');ctx.drawImage(im,(im.width-k)/2,(im.height-k)/2,k,k,0,0,Z,Z);res(cv.toDataURL('image/jpeg',0.82))};im.src=fr.result};fr.readAsDataURL(file)})}
+const newSeed=()=>Math.floor(Math.random()*1e9);
+function pickerHtml(px,ic){
+  const t=ic?ic.t:'none';
+  return '<div class="iconpick"><div class="prev" id="'+px+'_prev"></div><div class="choices">'+
+   '<label class="choice"><input type="radio" name="'+px+'_ic" id="'+px+'_gen" value="gen"'+(t==='gen'?' checked':'')+'><span>Icône générée<span class="inline row"><button type="button" class="btn ghost sm" id="'+px+'_again">Une autre</button></span></span></label>'+
+   '<label class="choice"><input type="radio" name="'+px+'_ic" id="'+px+'_img" value="img"'+(t==='img'?' checked':'')+'><span>Ma photo<span class="inline" style="display:block"><input type="file" accept="image/png,image/jpeg,image/webp" id="'+px+'_file"></span></span></label>'+
+   '<label class="choice"><input type="radio" name="'+px+'_ic" id="'+px+'_none" value="none"'+(t==='none'?' checked':'')+'><span>Pas d\'icône</span></label>'+
+   '</div></div><div id="'+px+'_msg"></div>';
+}
+function bindPicker(px,ic,onChange){
+  const D={mode:ic?ic.t:'none',gen:{t:'gen',seed:ic&&ic.t==='gen'?ic.seed:newSeed()},img:ic&&ic.t==='img'?ic:null};
+  const cur=()=>D.mode==='gen'?D.gen:D.mode==='img'?D.img:null;
+  const paint=()=>{const c=cur(),inner=iconInner(c);$('#'+px+'_prev').innerHTML=inner?'<span class="av">'+inner+'</span>':(D.mode==='img'?'Choisis une photo':'Aucune icône');onChange&&onChange(c)};
+  document.querySelectorAll('input[name='+px+'_ic]').forEach(rd=>rd.addEventListener('change',()=>{D.mode=rd.value;paint()}));
+  $('#'+px+'_again').addEventListener('click',e=>{e.preventDefault();D.gen={t:'gen',seed:newSeed()};D.mode='gen';$('#'+px+'_gen').checked=true;paint()});
+  $('#'+px+'_file').addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;$('#'+px+'_msg').innerHTML='';
+    try{D.img={t:'img',src:await fileToAvatar(f)};D.mode='img';$('#'+px+'_img').checked=true;paint()}
+    catch(_){$('#'+px+'_msg').innerHTML='<div class="msg err">Cette image ne s\'ouvre pas. Essaie une photo JPG ou PNG.</div>'}});
+  paint();
+  return {get:()=>{const c=cur();return D.mode==='img'&&!c?undefined:c}};
+}
+
+function renderPlayers(){
+  const c=S.cfg,ins=sortedInsc();
+  $('#placesTxt').textContent=Math.min(ins.length,c.capacite)+' / '+c.capacite+' inscriptions max';
+  let h='';
+  ins.forEach((x,i)=>{const wait=i>=c.capacite,a=rangOf(x.nom);h+='<li class="'+(wait?'wait':'')+'">'+(a?'<span class="chip">'+esc(a.rang)+'</span>':'')+avatarHtml(x.id,26)+esc(x.nom)+'<span class="meta">'+(wait?'Liste d\'attente':esc([a?'Tête de série':'',cohLab(x.cohorte)].filter(Boolean).join(' · ')))+'</span></li>'});
+  $('#plist').innerHTML=h||'<li style="background:transparent;color:var(--on-red-soft);font-weight:500">Personne encore. Sois le premier nom sur la liste.</li>';
+}
+
+/* --- form --- */
+function limitDate(c){const t=Date.parse((c||S.cfg).limite||'');return isNaN(t)?null:t}
+function limitLabel(c){const t=limitDate(c);if(!t)return '';const d=new Date(t);const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');return (Date.now()>t?'Inscriptions fermées depuis le ':'Inscriptions jusqu\'au ')+dayLong(ds)+', '+fmt(d.getHours()*60+d.getMinutes())}
+/* --- account (Netlify / Firebase version) --- */
+const AUTH_ERR={'auth/email-already-in-use':'Un compte existe déjà avec ce courriel. Choisis « J\'ai déjà un compte ».','auth/invalid-email':'Ce courriel n\'est pas valide.','auth/weak-password':'Le mot de passe doit avoir au moins 6 caractères.','auth/wrong-password':'Courriel ou mot de passe incorrect.','auth/invalid-credential':'Courriel ou mot de passe incorrect.','auth/invalid-login-credentials':'Courriel ou mot de passe incorrect.','auth/user-not-found':'Aucun compte avec ce courriel. Crée ton compte.','auth/too-many-requests':'Trop d\'essais. Attends quelques minutes et réessaie.','auth/network-request-failed':'Pas de connexion Internet. Réessaie.'};
+function authHtml(){
+  const t=S.authTab||'signup';
+  return '<div class="msg info" style="margin:0 0 16px">Connecte-toi pour t\'inscrire, retrouver ton profil et voir tes matchs sur n\'importe quel appareil.</div>'+
+   '<button type="button" class="btn gbtn" id="a_google"><svg viewBox="0 0 48 48" width="20" height="20" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg><span>Continuer avec Google</span></button><div id="gMsg"></div>'+
+   '<div class="orsep"><span>ou avec ton courriel</span></div>'+
+   '<div class="choices two" style="margin-bottom:16px"><button type="button" class="btn '+(t==='signup'?'':'ghost')+'" data-auth="signup">Créer mon compte</button><button type="button" class="btn '+(t==='login'?'':'ghost')+'" data-auth="login">J\'ai déjà un compte</button></div>'+
+   '<form id="authForm" novalidate><div class="field"><label for="a_mail">Courriel</label><input type="email" id="a_mail" autocomplete="email" placeholder="prenom.nom.1@ens.etsmtl.ca"></div>'+
+   '<div class="field"><label for="a_pw">Mot de passe</label><input type="password" id="a_pw" autocomplete="'+(t==='signup'?'new-password':'current-password')+'" placeholder="'+(t==='signup'?'Au moins 6 caractères':'')+'"></div>'+
+   '<div class="row regsub"><button class="btn" type="submit" id="a_go">'+(t==='signup'?'Créer mon compte':'Me connecter')+'</button>'+(t==='login'?'<button class="btn ghost" type="button" id="a_reset">Mot de passe oublié ?</button>':'')+'</div><div id="authMsg"></div></form>';
+}
+document.addEventListener('click',async e=>{if(!e.target.closest('#a_google'))return;const m=$('#gMsg');
+  const prov=new firebase.auth.GoogleAuthProvider();prov.setCustomParameters({prompt:'select_account'});
+  try{await S.auth.signInWithPopup(prov);S.flash=''}
+  catch(err){const c=err&&err.code;
+    if(c==='auth/popup-blocked'||c==='auth/operation-not-supported-in-this-environment'){try{await S.auth.signInWithRedirect(prov)}catch(_){}}
+    else if(c!=='auth/popup-closed-by-user'&&c!=='auth/cancelled-popup-request')m.innerHTML='<div class="msg err">'+esc(c==='auth/unauthorized-domain'?'Ce site n\'est pas encore autorisé dans Firebase (voir LISEZMOI, étape 5).':(AUTH_ERR[c]||'La connexion Google n\'a pas fonctionné. Réessaie.'))+'</div>'}});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-auth]');if(!b)return;S.authTab=b.dataset.auth;S.formKey=null;renderForm()});
+document.addEventListener('submit',async e=>{if(e.target.id!=='authForm')return;e.preventDefault();
+  const mail=$('#a_mail').value.trim(),pw=$('#a_pw').value,m=$('#authMsg'),t=S.authTab||'signup';
+  if(!mail||!pw){m.innerHTML='<div class="msg err">Entre ton courriel et ton mot de passe.</div>';return}
+  $('#a_go').disabled=true;
+  try{
+    if(t==='signup'){const cred=await S.auth.createUserWithEmailAndPassword(mail,pw);try{await cred.user.sendEmailVerification()}catch(_){}S.flash='Compte créé ! Un courriel de confirmation t\'a été envoyé. Remplis maintenant ton inscription.'}
+    else{await S.auth.signInWithEmailAndPassword(mail,pw);S.flash=''}
+  }catch(err){m.innerHTML='<div class="msg err">'+esc(AUTH_ERR[err&&err.code]||'Ça n\'a pas fonctionné. Réessaie.')+'</div>';const g=$('#a_go');if(g)g.disabled=false}
+});
+document.addEventListener('click',async e=>{if(!e.target.closest('#a_reset'))return;const mail=$('#a_mail').value.trim(),m=$('#authMsg');
+  if(!mail){m.innerHTML='<div class="msg err">Écris ton courriel, puis clique « Mot de passe oublié ? ».</div>';return}
+  try{await S.auth.sendPasswordResetEmail(mail);m.innerHTML='<div class="msg ok">Un courriel pour changer ton mot de passe a été envoyé à '+esc(mail)+'.</div>'}catch(err){m.innerHTML='<div class="msg err">'+esc(AUTH_ERR[err&&err.code]||'Envoi impossible. Vérifie le courriel.')+'</div>'}});
+document.addEventListener('click',async e=>{if(!e.target.closest('[data-logout]'))return;try{await S.auth.signOut();S.flash='';setView('inscription')}catch(_){}});
+
+function myInsc(){return S.me?inscById(S.me):null}
+function renderForm(){
+  const area=$('#formArea'),mine=myInsc(),c=S.cfg;
+  if(!S.loaded){area.innerHTML='<p class="sub">Chargement…</p>';return}
+  if(mine&&!S.editing){
+    const idx=sortedInsc().findIndex(x=>x.id===mine.id),wait=idx>=c.capacite;
+    const dj=(mine.jours||[]).map(dayShort).join(', '),dh=(mine.heures||[]).map(h=>(c.creneaux.find(x=>x.h===h)||{lab:h}).lab).join(', ');
+    area.innerHTML='<div class="msg ok"><b>Tu es inscrit·e comme « '+esc(mine.nom)+' ».</b><br>'+(wait?'Tu es sur la liste d\'attente (position '+(idx-c.capacite+1)+'). On te fait signe si une place se libère.':'Tes dispos : '+esc(dj||'—')+' · '+esc(dh||'—')+'. Ton premier match apparaîtra dans l\'onglet Tableau.')+'</div>'+
+      '<div class="row" style="margin-top:14px"><a class="btn" href="#profil" style="text-decoration:none">Voir mon profil</a><a class="btn y" href="#tableau" style="text-decoration:none">Voir le tableau</a><button class="btn ghost" id="editMe" type="button">Modifier</button>'+(c.verrou?'':'<button class="btn ghost" id="delMe" type="button">'+(S.armed==='del'?'Confirmer le retrait':'Me désinscrire')+'</button>')+'</div><div id="fMsg"></div>';
+    $('#editMe').onclick=()=>{S.editing=true;renderForm()};
+    const d=$('#delMe');if(d)d.onclick=async()=>{if(S.armed!=='del'){S.armed='del';renderForm();return}S.armed=null;try{await S.db.doc('inscriptions/'+S.me).delete();try{await S.db.doc('contacts/'+S.me).delete()}catch(e){}}catch(e){$('#fMsg').innerHTML='<div class="msg err">Le retrait n\'a pas fonctionné. Réessaie ou écris à l\'organisateur.</div>'}};
+    return;
+  }
+  const lim=limitDate(c);
+  if(S.mode==='firebase'&&!S.me){if(!document.getElementById('authForm')||S.formKey!=='auth'){S.formKey='auth';area.innerHTML=authHtml()}return}
+  // don't wipe a form the person is filling in when live data arrives
+  const fkey=(mine?mine.id:'-')+'|'+S.editing;if(S.formKey===fkey&&document.getElementById('regForm'))return;S.formKey=fkey;
+  if(!mine&&lim&&Date.now()>lim&&!S.admin){area.innerHTML='<div class="msg info"><b>Les inscriptions sont fermées.</b> '+esc(limitLabel(c))+'. Suis le tournoi dans l\'onglet Tableau.</div>';return}
+  const v=mine||{},vj=v.jours||[],vh=v.heures||[];
+  S.draftIcon=v.icone!==undefined?v.icone:{t:'gen',seed:newSeed()};
+  area.innerHTML=(S.flash?'<div class="msg ok" style="margin:0 0 16px">'+esc(S.flash)+'</div>':'')+(S.mode==='firebase'?'<p class="hint" style="margin:0 0 14px">Connecté·e : <b>'+esc(S.email)+'</b> · <button type="button" class="btn ghost sm" data-logout>Me déconnecter</button></p>':'')+'<form id="regForm" novalidate>'+
+   '<div class="field"><label for="f_nom">Nom affiché dans le tableau <span class="req">*</span></label><input type="text" id="f_nom" maxlength="28" autocomplete="nickname" placeholder="Ex. Samuel T." value="'+esc(v.nom||'')+'"><span class="hint">Prénom + initiale ou surnom. 28 caractères max.</span></div>'+
+   '<div class="field"><span class="legend">Ta cohorte <span class="req">*</span></span><div class="choices two">'+COH.map(o=>'<label class="choice"><input type="radio" name="coh" id="f_coh_'+o[0]+'" value="'+o[0]+'"'+(String(v.cohorte)===o[0]?' checked':'')+'><span>'+o[1]+'</span></label>').join('')+'</div></div>'+
+   '<div class="field"><span class="legend">Ton niveau <span class="req">*</span></span><div class="choices">'+NIV.map(n=>'<label class="choice"><input type="radio" name="niv" id="f_niv_'+n[0]+'" value="'+n[0]+'"'+(v.niveau===n[0]?' checked':'')+'><span>'+n[1]+'</span></label>').join('')+'</div></div>'+
+   '<div class="field"><span class="legend">Les jours où tu peux jouer <span class="req">*</span></span><span class="hint">Coche tous ceux qui marchent. Plus tu en coches, plus c\'est facile de placer tes matchs.</span><div class="choices three">'+c.jours.map((ds,i)=>{const x=dp(ds);return '<label class="choice day-c"><input type="checkbox" name="jr" id="f_j'+i+'" value="'+ds+'"'+(vj.includes(ds)?' checked':'')+'><b>'+x.wl.charAt(0).toUpperCase()+x.wl.slice(1)+'</b><small>'+x.d+' '+x.m+(i===c.jours.length-1?' · finales':'')+'</small></label>'}).join('')+'</div></div>'+
+   '<div class="field"><span class="legend">Les créneaux qui te conviennent <span class="req">*</span></span><div class="choices three">'+c.creneaux.map((cr,i)=>'<label class="choice"><input type="checkbox" name="hr" id="f_h'+i+'" value="'+cr.h+'"'+(vh.includes(cr.h)?' checked':'')+'><span>'+esc(cr.lab)+'</span></label>').join('')+'</div></div>'+
+   '<div class="field"><label for="f_pref">Le jour où tu préfères jouer</label><select id="f_pref"><option value="">Pas de préférence</option>'+c.jours.map(ds=>'<option value="'+ds+'"'+(v.prefJour===ds?' selected':'')+'>'+esc(dayLong(ds))+'</option>').join('')+'</select></div>'+
+   '<div class="field"><span class="legend">Ton icône</span><span class="hint">Elle apparaît à côté de ton nom dans le tableau. Tu pourras la changer dans « Mon profil ».</span>'+pickerHtml('fi',S.draftIcon)+'</div>'+
+   '<div class="field"><label for="f_contact">Courriel ou Discord <span class="req">*</span></label><input type="text" id="f_contact" maxlength="80" placeholder="prenom.nom.1@ens.etsmtl.ca"><span class="hint">Visible seulement par l\'organisateur, pour te prévenir d\'un changement d\'horaire.</span></div>'+
+   '<div class="field choices"><label class="choice"><input type="checkbox" id="f_regl"'+(mine?' checked':'')+'><span>J\'accepte le règlement <span class="req">*</span><small>Meilleur de 3, sets de 11 points. 5 min de retard à mon match = forfait. J\'entre ou je confirme le score à la table, juste après le match.</small></span></label></div>'+
+   '<div class="row regsub"><button class="btn" type="submit" id="f_go">'+(mine?'Enregistrer les changements':'Je m\'inscris')+'</button>'+(mine?'<button class="btn ghost" type="button" id="f_cancel">Annuler</button>':'')+'</div><div id="fMsg"></div></form>';
+  if(mine&&S.contactMine)$('#f_contact').value=S.contactMine;else if(S.email)$('#f_contact').value=S.email;
+  const cancel=$('#f_cancel');if(cancel)cancel.onclick=()=>{S.editing=false;renderForm()};
+  S.formPicker=bindPicker('fi',S.draftIcon);
+  $('#regForm').addEventListener('submit',onSubmit);
+}
+async function onSubmit(e){
+  e.preventDefault();
+  const nom=$('#f_nom').value.trim(),cohEl=document.querySelector('input[name=coh]:checked'),nivEl=document.querySelector('input[name=niv]:checked'),
+    jours=[...document.querySelectorAll('input[name=jr]:checked')].map(x=>x.value),heures=[...document.querySelectorAll('input[name=hr]:checked')].map(x=>x.value),
+    pref=$('#f_pref').value,contact=$('#f_contact').value.trim(),regl=$('#f_regl').checked;
+  const err=[];
+  if(!nom)err.push('ton nom');if(!cohEl)err.push('ta cohorte');if(!nivEl)err.push('ton niveau');
+  if(!jours.length)err.push('au moins un jour');if(!heures.length)err.push('au moins un créneau');
+  if(!contact)err.push('un courriel ou Discord');if(!regl)err.push('l\'acceptation du règlement');
+  const msg=$('#fMsg');
+  if(err.length){msg.innerHTML='<div class="msg err">Il manque : '+esc(err.join(', '))+'.</div>';return}
+  const clash=S.insc.find(x=>x.id!==S.me&&x.nom.toLowerCase()===nom.toLowerCase());
+  if(clash){msg.innerHTML='<div class="msg err">Le nom « '+esc(nom)+' » est déjà pris. Ajoute une initiale.</div>';return}
+  const ic=S.formPicker?S.formPicker.get():null;
+  if(ic===undefined){msg.innerHTML='<div class="msg err">Choisis une photo, ou une autre option d\'icône.</div>';return}
+  const body={nom,icone:ic||null,cohorte:cohEl.value,niveau:nivEl.value,jours,heures,prefJour:pref||null,createdAt:(myInsc()&&myInsc().createdAt)||Date.now()};
+  const fallback=()=>{const labH=heures.map(h=>(S.cfg.creneaux.find(x=>x.h===h)||{lab:h}).lab);
+    const txt='Inscription Ping Pong Tournoi #2\nNom : '+nom+'\nCohorte : '+cohLab(cohEl.value)+'\nNiveau : '+NIV.find(n=>n[0]===nivEl.value)[1]+'\nJours dispo : '+jours.map(dayShort).join(', ')+'\nCréneaux : '+labH.join(', ')+'\nJour préféré : '+(pref?dayLong(pref):'aucun')+'\nContact : '+contact;
+    msg.innerHTML='<div class="msg info"><b>Ton accès à cette page ne permet pas d\'enregistrer l\'inscription ici.</b> Copie ce message et envoie-le à l\'organisateur, il t\'ajoutera au tableau.<pre class="copy" id="cpTxt">'+esc(txt)+'</pre><button type="button" class="btn sm" id="cpBtn">Copier le message</button></div>';
+    $('#cpBtn').onclick=async()=>{try{await navigator.clipboard.writeText(txt);$('#cpBtn').textContent='Copié'}catch(e){const r=document.createRange();r.selectNodeContents($('#cpTxt'));const s=getSelection();s.removeAllRanges();s.addRange(r)}}};
+  if(!S.db||!S.me){fallback();return}
+  $('#f_go').disabled=true;
+  try{
+    await S.db.doc('inscriptions/'+S.me).set(body);
+    try{await S.db.doc('contacts/'+S.me).set({contact,nom})}catch(e){}
+    const first=!myInsc();S.flash='';S.contactMine=contact;S.editing=false;S.armed=null;S.formKey=null;renderAll();
+    if(first){S.justJoined=true;setView('profil');try{history.replaceState(null,'','#profil')}catch(_){}window.scrollTo({top:0})}
+  }catch(e){fallback();const b=$('#f_go');if(b)b.disabled=false}
+}
+
+/* --- bracket --- */
+function sideHtml(o,which,id){
+  const s=o[which],won=o.st==='done'&&((which==='a'&&o.win===1)||(which==='b'&&o.win===2)),lost=o.st==='done'&&!won,sc=setCount(id)[which==='a'?0:1];
+  if(s.st!=='ok')return '<div class="sd tbd"><span></span><span class="nm">'+esc(s.st==='bye'?'—':(s.lab||'À venir'))+'</span><span class="sc"></span></div>';
+  const p=s.p;if(p.placeholder)return '<div class="sd tbd"><span></span><span class="nm">'+esc(p.nom)+'</span><span class="sc"></span></div>';
+  const chip=avatarHtml(p.id,22);
+  return '<div class="sd'+(won?' won':'')+(lost?' lost':'')+'">'+chip+'<span class="nm">'+esc(p.nom)+'</span><span class="sc">'+(o.st==='done'||(o.st==='live'&&sc!==0)?sc:'')+'</span></div>';
+}
+function cardHtml(id){
+  const o=VIEW.R[id],me=store.get('pp_who');
+  const isMe=me&&((o.a.p&&o.a.p.id===me)||(o.b.p&&o.b.p.id===me));
+  const src=o.eff&&o.eff.src;
+  const status=src==='conteste'?'<span class="cont">⚠ Contesté</span>':o.st==='live'?'<span class="live">En cours</span>':o.st==='done'?(src==='attente'?'<span class="pend">À confirmer</span>':'Terminé'):esc(when(id,true));
+  const sets=setsTxt(id);
+  return '<button type="button" class="m'+(isMe?' me':'')+'" data-mid="'+id+'"><div class="m-head"><span class="id">'+id+'</span><span>'+status+'</span></div>'+sideHtml(o,'a',id)+sideHtml(o,'b',id)+(sets?'<div class="sets">'+esc(sets)+'</div>':'')+'</button>';
+}
+function renderBracket(){
+  const area=$('#bracketArea');
+  if(!VIEW){area.innerHTML='<div class="banner">Le tableau se construira dès qu\'il y aura au moins 2 joueurs.</div>';return}
+  const {B,R,st}=VIEW,c=S.cfg;let h='';
+  h+=c.verrou?'<div class="banner"><b>Tableau officiel.</b> Positions verrouillées selon l\'ordre d\'inscription. Les résultats s\'affichent en direct dès que l\'organisateur entre un score.</div>'
+             :'<div class="banner"><b>Aperçu en direct.</b> Estimation de '+(c.estimation||24)+' joueurs : les « Places libres » se remplissent à chaque inscription. Pas de tirage : les joueurs sont placés dans l\'ordre d\'inscription. Les 8 premiers commencent en 8es.</div>';
+  const cols=(br,maxR)=>{let out='';for(let r=1;r<=maxR;r++){const ms=Object.values(B.M).filter(m=>m.br===br&&m.r===r&&!st[m.id].void&&!st[m.id].wo);if(!ms.length)continue;
+    const days=[...new Set(ms.map(m=>VIEW.plan[m.id]&&VIEW.plan[m.id].day))].filter(x=>x!=null).map(d=>dayShort(c.jours[d]));
+    out+='<div class="col"><h4>'+esc(ms[0].lab)+'<small>'+esc(days.join(' / '))+'</small></h4><div class="stack">'+ms.map(m=>cardHtml(m.id)).join('')+'</div></div>'}return out};
+  h+='<div class="scorehow"><b>Après ton match, à la table :</b><ol><li>Le <b>gagnant</b> touche le match ci-dessous et entre le score.</li><li>Le <b>perdant</b> l\'ouvre et touche « Oui, confirmer ».</li><li>C\'est fait : le prochain match apparaît tout de suite.</li></ol><span>Un arbitre est présent ? Il peut confirmer ou modifier le score directement. Pas d\'accord ? L\'organisateur tranche.</span></div>';
+  h+='<div class="bdesk">';
+  h+='<div class="bsec"><div class="side-h"><h3>Tableau des gagnants</h3><span>Une défaite = descente chez les perdants</span></div><div class="bscroll"><div class="bracket">'+cols('W',B.k)+'</div></div></div>';
+  if(B.LR)h+='<div class="bsec"><div class="side-h"><h3>Tableau des perdants</h3><span>Deuxième défaite = élimination</span></div><div class="bscroll"><div class="bracket">'+cols('L',B.LR)+'</div></div></div>';
+  const f2on=R.F2.a.st==='ok';
+  const champ=R.F1.st==='done'&&R.F1.win===1?R.F1.winner:(R.F2.st==='done'?R.F2.winner:null);
+  h+='<div class="bsec gf"><div class="side-h"><h3>Grande finale</h3><span>'+esc(dayLong(c.jours[c.jours.length-1]))+' · match décisif si le finaliste des perdants gagne</span></div>'+(champ?'<div class="trophy">Champion : '+esc(champ.nom)+'</div>':'')+'<div class="bscroll"><div class="bracket"><div class="col"><h4>Finale</h4><div class="stack">'+cardHtml('F1')+'</div></div>'+(f2on||R.F1.st!=='done'?'<div class="col"><h4>Match décisif<small>Seulement si nécessaire</small></h4><div class="stack">'+cardHtml('F2')+'</div></div>':'')+'</div></div></div>';
+  h+='</div>'+bracketMobile(champ,f2on);
+  area.innerHTML=h;
+  const on=area.querySelector('.rchip.on');if(on&&on.scrollIntoView)try{on.scrollIntoView({block:'nearest',inline:'center'})}catch(_){}
+}
+function bracketMobile(champ,f2on){
+  const {B,R,st}=VIEW,c=S.cfg,me=store.get('pp_who')||(myInsc()?S.me:''),rounds=[];
+  const real=m=>!st[m.id].void&&!st[m.id].wo;
+  for(let r=1;r<=B.k;r++){const ids=Object.values(B.M).filter(m=>m.br==='W'&&m.r===r&&real(m)).map(m=>m.id);if(ids.length)rounds.push({key:'W'+r,grp:'Gagnants',lab:B.M[ids[0]].lab,ids})}
+  for(let r=1;r<=B.LR;r++){const ids=Object.values(B.M).filter(m=>m.br==='L'&&m.r===r&&real(m)).map(m=>m.id);if(ids.length)rounds.push({key:'L'+r,grp:'Perdants',lab:B.M[ids[0]].lab.replace('Perdants · ','').replace(/^tour/,'Tour'),ids})}
+  rounds.push({key:'F',grp:'Finale',lab:'Grande finale',ids:['F1'].concat(f2on||R.F1.st!=='done'?['F2']:[])});
+  const hasMe=r=>me&&r.ids.some(id=>{const o=R[id];return (o.a.p&&o.a.p.id===me)||(o.b.p&&o.b.p.id===me)});
+  let cur=rounds.find(r=>r.key===S.mround);
+  if(!cur&&me)cur=rounds.find(r=>r.ids.some(id=>{const o=R[id];return o.st!=='done'&&((o.a.p&&o.a.p.id===me)||(o.b.p&&o.b.p.id===me))}));
+  if(!cur)cur=rounds.find(r=>r.ids.some(id=>R[id].st!=='done'))||rounds[rounds.length-1];
+  const days=[...new Set(cur.ids.map(id=>VIEW.plan[id]&&VIEW.plan[id].day))].filter(x=>x!=null).map(d=>dayShort(c.jours[d]));
+  const done=cur.ids.filter(id=>R[id].st==='done').length;
+  return '<div class="bmob">'+(champ?'<div class="trophy">Champion : '+esc(champ.nom)+'</div>':'')+
+    '<div class="hscroll"><div class="rchips" role="tablist" aria-label="Tours">'+rounds.map(r=>'<button type="button" role="tab" aria-selected="'+(r===cur)+'" class="rchip'+(r===cur?' on':'')+(hasMe(r)?' has-me':'')+'" data-round="'+r.key+'"><small>'+esc(r.grp)+'</small>'+esc(r.lab)+'</button>').join('')+'</div><button class="hs-arrow l" type="button" aria-label="Tours précédents" hidden>‹</button><button class="hs-arrow r" type="button" aria-label="Tours suivants" hidden>›</button></div>'+
+    '<div class="mhead"><b>'+esc(cur.grp==='Finale'?cur.lab:cur.grp+' · '+cur.lab)+'</b><span>'+esc(days.join(' / '))+' · '+done+'/'+cur.ids.length+' joués</span></div>'+
+    '<div class="mlist">'+cur.ids.map(id=>cardHtml(id)).join('')+'</div></div>';
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-round]');if(!b)return;S.mround=b.dataset.round;renderBracket()});
+function renderFinder(){
+  const sel=$('#who'),cur=store.get('pp_who')||(myInsc()?S.me:''),pl=(VIEW?VIEW.pl:players()).filter(p=>!p.placeholder);
+  sel.innerHTML='<option value="">— Choisir —</option>'+pl.map(p=>'<option value="'+esc(p.id)+'"'+(p.id===cur?' selected':'')+'>'+esc(p.nom)+'</option>').join('');
+  const mine=$('#mine');
+  if(!cur||!VIEW){mine.textContent='Choisis ton nom pour voir ton prochain match, le jour, l\'heure et la table.';return}
+  const p=pl.find(x=>x.id===cur);if(!p){mine.textContent='Ce nom n\'est plus dans le tableau.';return}
+  let losses=0,next=null;
+  for(const m of VIEW.B.order){const o=VIEW.R[m.id];const inA=o.a.p&&o.a.p.id===cur,inB=o.b.p&&o.b.p.id===cur;if(!inA&&!inB)continue;
+    if(o.st==='done'){if((inA&&o.win===2)||(inB&&o.win===1))losses++}else if(o.st!=='wo'&&o.st!=='void'&&!next)next={m,o,opp:inA?o.b:o.a}}
+  const F1=VIEW.R.F1,F2=VIEW.R.F2;
+  if((F1.st==='done'&&F1.win===1&&F1.winner.id===cur)||(F2.st==='done'&&F2.winner.id===cur)){mine.innerHTML='<strong>Champion·ne du Tournoi #2.</strong> Bravo !';return}
+  if(losses>=2||(losses>=1&&!next&&F1.st==='done')){mine.innerHTML='<strong>Éliminé·e</strong> après 2 défaites. Merci d\'avoir joué, viens voir la finale.';return}
+  if(next){const opp=next.opp.st==='ok'?next.opp.p.nom:(next.opp.lab||'adversaire à déterminer');
+    mine.innerHTML=(next.o.st==='live'?'<span class="live">En cours</span> ':'Prochain match ')+'<strong>'+esc(next.m.id)+'</strong> contre <b>'+esc(opp)+'</b><br>'+esc(when(next.m.id))+(losses?' · tu as 1 défaite, plus droit à l\'erreur':'');}
+  else mine.textContent='En attente de ton prochain adversaire.';
+}
+
+/* --- profile --- */
+function playerStats(pid){
+  const out={w:0,l:0,hist:[],next:null,champion:false,eliminated:false,rankTxt:'',where:''};
+  if(!VIEW)return out;
+  const B=VIEW.B,R=VIEW.R,waveKey=m=>m.br==='F'?'F'+m.r:m.br+m.r,keys=[];
+  for(const m of B.order){const k=waveKey(m);if(!keys.includes(k))keys.push(k)}
+  const elim={};
+  for(const m of B.order){const o=R[m.id];if(o.st!=='done')continue;const lid=o.loser.id;
+    if(m.br==='L'||m.id==='F2'||(m.id==='F1'&&o.win===1))elim[lid]=keys.indexOf(waveKey(m))}
+  for(const m of B.order){const o=R[m.id],inA=o.a.p&&o.a.p.id===pid,inB=o.b.p&&o.b.p.id===pid;if(!inA&&!inB)continue;
+    if(o.st==='done'){const won=o.winner.id===pid;won?out.w++:out.l++;out.hist.push({m,o,won,opp:inA?o.b.p:o.a.p})}
+    else if(o.st!=='wo'&&o.st!=='void'&&!out.next)out.next={m,o,opp:inA?o.b:o.a}}
+  const F1=R.F1,F2=R.F2;
+  out.champion=(F1.st==='done'&&F1.win===1&&F1.winner.id===pid)||(F2.st==='done'&&F2.winner.id===pid);
+  const real=VIEW.pl.filter(p=>!p.placeholder);
+  if(out.champion){out.rankTxt='1er';out.where='Champion·ne'}
+  else if(elim[pid]!=null){out.eliminated=true;const k=elim[pid],better=real.filter(p=>elim[p.id]==null||elim[p.id]>k).length,tie=real.filter(p=>elim[p.id]===k).length;
+    out.rankTxt=(better+1)+(better+1===1?'er':'e')+(tie>1?' – '+(better+tie)+'e':'');out.where='Éliminé·e'}
+  else{const alive=real.filter(p=>elim[p.id]==null).length;out.rankTxt='Top '+alive;
+    out.where=out.next?(out.next.m.br==='W'?'Gagnants · '+out.next.m.lab:out.next.m.lab):(out.l?'Tableau des perdants':'Tableau des gagnants')}
+  return out;
+}
+function refBlock(){
+  if(!S.me)return '';
+  if(isRef())return '<div class="repbox"><b>Tu es arbitre.</b> Tu peux confirmer ou modifier le score de n\'importe quel match : touche le match dans le Tableau.</div>';
+  const d=S.arb[S.me];
+  if(d)return '<div class="repbox">Demande d\'arbitre envoyée au nom de <b>'+esc(d.nom||'')+'</b>. En attente de l\'organisateur. <button class="btn ghost sm" type="button" id="arbCancel">Annuler</button></div>';
+  return '<div class="repbox"><b>Tu surveilles des matchs ?</b> Deviens arbitre pour confirmer ou modifier les scores sur place.<div class="row"><input type="text" id="arbNom" maxlength="28" placeholder="Ton nom" style="flex:1;min-width:0" value="'+esc((myInsc()||{}).nom||'')+'"><button class="btn sm" type="button" id="arbAsk">Je veux être arbitre</button></div><div id="arbMsg"></div></div>';
+}
+document.addEventListener('click',async e=>{
+  if(e.target.closest('#arbAsk')){const n=$('#arbNom').value.trim();if(!n){$('#arbMsg').innerHTML='<div class="msg err">Écris ton nom.</div>';return}
+    try{await S.db.doc('arbitres/'+S.me).set({nom:n.slice(0,28),at:Date.now()})}catch(_){$('#arbMsg').innerHTML='<div class="msg err">Pas envoyé. Réessaie.</div>'}}
+  if(e.target.closest('#arbCancel')){try{await S.db.doc('arbitres/'+S.me).delete()}catch(_){}}
+});
+function renderProfile(){
+  const area=$('#profArea');
+  if(S.profEditing&&document.getElementById('pi_prev'))return; // keep the picker open while choosing
+  if(!S.loaded){area.innerHTML='<div class="card"><p class="sub">Chargement…</p></div>';return}
+  const mine=myInsc();
+  if(!mine){area.innerHTML='<div class="card"><h2>Mon profil</h2><p class="sub">'+(S.me?'Tu n\'es pas encore inscrit·e. Ton profil apparaîtra ici dès ton inscription.':(S.mode==='firebase'?'Connecte-toi avec ton courriel pour voir ton profil.':'Connecte-toi et inscris-toi pour avoir ton profil.'))+'</p><a class="btn" href="#inscription" style="text-decoration:none;display:inline-block">M\'inscrire</a>'+refBlock()+'</div>';return}
+  const c=S.cfg,st=playerStats(mine.id),idx=sortedInsc().findIndex(x=>x.id===mine.id),wait=idx>=c.capacite;
+  const inBracket=VIEW&&VIEW.pl.some(p=>p.id===mine.id);
+  const dj=(mine.jours||[]).map(dayShort).join(', ')||'—',dh=(mine.heures||[]).map(h=>(c.creneaux.find(x=>x.h===h)||{lab:h}).lab).join(', ')||'—';
+  const init=esc((mine.nom||'?').trim().charAt(0).toUpperCase());
+  const big=iconInner(mine.icone)?avatarHtml(mine.id,132):'<div class="noicon">'+init+'</div>';
+  let nextTxt='—';
+  if(st.next){const opp=st.next.opp.st==='ok'?st.next.opp.p.nom:(st.next.opp.lab||'à déterminer');nextTxt=esc(st.next.m.id)+' contre '+esc(opp)+' · '+esc(when(st.next.m.id))}
+  let h='<div class="prof"><div class="card big">'+big+'<div><h2>'+esc(mine.nom)+'</h2><p class="sub" style="margin:4px 0 0">'+esc([cohLab(mine.cohorte),(NIV.find(n=>n[0]===mine.niveau)||[])[1]].filter(Boolean).join(' · '))+'</p></div>'+
+    '<button class="btn ghost sm" type="button" id="pEditIcon">Changer mon icône</button><div id="pPick" style="width:100%;text-align:left"></div></div>';
+  h+='<div class="card">'+(S.justJoined?'<p class="msg ok" style="margin:0 0 14px"><b>Bienvenue dans le tournoi !</b> Voici ton profil. Tu le retrouves en tout temps dans l\'onglet « Mon profil ».</p>':'')+'<div class="eyebrow" style="color:var(--red)">Ton tournoi</div>';
+  if(wait)h+='<p class="msg info">Tu es sur la liste d\'attente (position '+(idx-c.capacite+1)+'). On te fait signe si une place se libère.</p>';
+  else if(!inBracket)h+='<p class="msg info">Tu n\'es pas dans le tableau verrouillé. Parle à l\'organisateur.</p>';
+  h+='<div class="tiles"><div class="tile"><small>Classement</small><b class="red">'+esc(wait?'—':(st.rankTxt||'—'))+'</b></div><div class="tile"><small>Victoires</small><b>'+st.w+'</b></div><div class="tile"><small>Défaites</small><b>'+st.l+'</b></div><div class="tile"><small>Où tu es</small><b style="font-size:15px">'+esc(wait?'Liste d\'attente':st.where||'—')+'</b></div></div>';
+  h+='<dl class="kvl"><dt>Prochain match</dt><dd>'+nextTxt+'</dd>'+(S.mode==='firebase'?'<dt>Compte</dt><dd>'+esc(S.email)+'</dd>':'')+'<dt>Courriel / Discord</dt><dd>'+esc(S.contactMine||'—')+'</dd><dt>Jours dispo</dt><dd>'+esc(dj)+'</dd><dt>Créneaux</dt><dd>'+esc(dh)+'</dd><dt>Jour préféré</dt><dd>'+esc(mine.prefJour?dayLong(mine.prefJour):'Aucun')+'</dd></dl>';
+  h+='<div class="row" style="margin-top:14px"><button class="btn ghost sm" type="button" id="pEditInfo">Modifier mes infos et dispos</button><a class="btn y sm" href="#tableau" style="text-decoration:none">Voir le tableau</a>'+(S.mode==='firebase'?'<button class="btn ghost sm" type="button" data-logout>Me déconnecter</button>':'')+'</div>';
+  h+=refBlock();
+  h+='<h3 style="font-size:18px;margin-top:22px">Mes matchs</h3>'+(st.hist.length?'<ul class="hist">'+st.hist.map(x=>'<li><span class="res '+(x.won?'v':'d')+'">'+(x.won?'V':'D')+'</span><span class="grow">contre <b>'+esc(x.opp?x.opp.nom:'—')+'</b><br><small>'+esc(x.m.id+' · '+x.m.lab+' · '+setCount(x.m.id).join(':')+' ('+(setsTxt(x.m.id)||'')+')'+(x.o.eff&&x.o.eff.src==='attente'?' · à confirmer':''))+'</small></span></li>').join('')+'</ul>':'<p class="sub" style="margin-top:6px">Aucun match joué pour l\'instant.</p>');
+  h+='</div></div>';
+  area.innerHTML=h;
+  $('#pEditInfo').onclick=()=>{S.editing=true;renderForm();setView('inscription')};
+  $('#pEditIcon').onclick=()=>{
+    S.profEditing=true;$('#pEditIcon').hidden=true;
+    $('#pPick').innerHTML=pickerHtml('pi',mine.icone||null)+'<div class="row" style="margin-top:10px"><button class="btn sm" type="button" id="pSave">Enregistrer</button><button class="btn ghost sm" type="button" id="pCancel">Annuler</button></div>';
+    const pk=bindPicker('pi',mine.icone||null);
+    $('#pCancel').onclick=()=>{S.profEditing=false;renderProfile()};
+    $('#pSave').onclick=async()=>{const ic=pk.get();if(ic===undefined){$('#pi_msg').innerHTML='<div class="msg err">Choisis une photo, ou une autre option.</div>';return}
+      try{await S.db.doc('inscriptions/'+S.me).update({icone:ic||null});S.profEditing=false;renderAll()}catch(_){$('#pi_msg').innerHTML='<div class="msg err">Pas enregistré. Réessaie.</div>'}};
+  };
+}
+
+/* --- schedule view --- */
+function renderSched(){
+  const area=$('#schedArea');
+  if(!VIEW){area.innerHTML='<div class="banner">L\'horaire apparaîtra dès qu\'il y aura au moins 2 joueurs.</div>';return}
+  const c=S.cfg,me=store.get('pp_who');
+  const nM=Object.keys(VIEW.plan).filter(id=>id!=='F2').length,nOver=Object.keys(VIEW.plan).filter(id=>VIEW.plan[id].over&&!(id==='F2'&&VIEW.R.F2.a.st==='bye')).length;
+  let h='<div class="banner"><b>'+nM+' matchs</b> (+ match décisif si nécessaire) pour <b>'+VIEW.capTotal+' places de match</b> sur '+c.jours.length+' jours · '+c.tables+' table'+(c.tables>1?'s':'')+', '+c.duree+' min par match. Présente-toi 10 minutes avant. Clique un match pour les détails.</div>';
+  if(nOver)h+='<div class="banner" style="border-color:var(--yellow)"><b>'+nOver+' match'+(nOver>1?'s dépassent':' dépasse')+' la fin des créneaux.</b> '+(S.admin?'Ajoute une table, raccourcis la durée par match ou limite le nombre de joueurs (onglet Organisateur).':'L\'horaire sera ajusté par l\'organisateur.')+'</div>';
+  c.jours.forEach((ds,d)=>{
+    const ids=Object.keys(VIEW.plan).filter(id=>VIEW.plan[id].day===d&&!(id==='F2'&&VIEW.R.F2.a.st==='bye')).sort((a,b)=>VIEW.plan[a].min-VIEW.plan[b].min||VIEW.plan[a].table-VIEW.plan[b].table);
+    const isLast=d===c.jours.length-1;
+    h+='<div class="sched"><h3>'+esc(dayLong(ds).replace(/^./,x=>x.toUpperCase()))+(isLast?' · Finales':'')+'</h3><p class="sub">'+(ids.length?ids.length+' match'+(ids.length>1?'s':''):'Aucun match prévu ce jour pour l\'instant')+'</p>';
+    if(!ids.length){h+='</div>';return}
+    h+='<div class="tablewrap"><table><thead><tr><th>Heure</th><th>Table</th><th>Match</th><th>Joueurs</th><th>Statut</th></tr></thead><tbody>';
+    let lastSlot=-1;
+    for(const id of ids){const o=VIEW.R[id],p=VIEW.plan[id];
+      if(p.slot!==lastSlot){lastSlot=p.slot;h+='<tr class="slot"><td colspan="5">Créneau '+esc((c.creneaux[p.slot]||{}).lab||'')+'</td></tr>'}
+      const nm=s=>s.st==='ok'?esc(s.p.nom):'<span style="color:var(--ink-soft);font-style:italic">'+esc(s.lab||'À venir')+'</span>';
+      const isMe=me&&((o.a.p&&o.a.p.id===me)||(o.b.p&&o.b.p.id===me));
+      const stt=(o.eff&&o.eff.src==='conteste')?'<span class="st on">⚠ Contesté</span>':o.st==='done'?'<span class="st done">'+esc(setCount(id).join(':'))+' · '+esc(o.winner.nom)+(o.eff&&o.eff.src==='attente'?' · à confirmer':'')+'</span>':o.st==='live'?'<span class="st on">En cours</span>':'<span class="st todo">À venir</span>';
+      const iss=(S.admin&&o.st!=='done'?dispoIssues(id):[]).concat(p.over?['Dépasse la fin du créneau ('+(c.creneaux[p.slot]||{}).fin+')']:[]);
+      h+='<tr class="click'+(isMe?' me':'')+'" data-mid="'+id+'"><td class="t">'+fmt(p.min)+'</td><td>T'+p.table+'</td><td><span class="id">'+id+'</span> <span style="color:var(--ink-soft);font-size:12px">'+esc(VIEW.B.M[id].lab)+'</span></td><td>'+nm(o.a)+' <span style="color:var(--red);font-weight:700">vs</span> '+nm(o.b)+iss.map(t=>'<span class="warn">⚠ '+esc(t)+'</span>').join('')+'</td><td>'+stt+'</td></tr>'}
+    h+='</tbody></table></div></div>';
+  });
+  area.innerHTML=h;
+}
+
+/* --- modal --- */
+function openMatch(id){
+  if(!VIEW)return;const o=VIEW.R[id],m=VIEW.B.M[id],r=S.matchs[id]||{},c=S.cfg,md=$('#modal');
+  const na=o.a.st==='ok'?o.a.p.nom:(o.a.lab||'À venir'),nb=o.b.st==='ok'?o.b.p.nom:(o.b.lab||'À venir');
+  let h='<div class="eyebrow" style="color:var(--red)">'+esc(id)+' · '+esc(m.lab)+'</div><h3 style="margin-top:6px">'+esc(when(id))+'</h3><div class="vs"><span>'+esc(na)+'</span><span>vs</span><span>'+esc(nb)+'</span></div>';
+  const er=effR(id)||{},src=o.eff&&o.eff.src;
+  if(o.st==='done')h+='<p class="msg '+(src==='attente'?'info':'ok')+'"><b>'+esc(o.winner.nom)+'</b> gagne '+esc(setCount(id).join(':'))+(er.forfait?' par forfait':' ('+esc(setsTxt(id))+')')+'.'+(src==='attente'?' <b>À confirmer</b> : score entré par '+esc(o.eff.by.nom)+', en attente de '+esc(o.eff.other.nom)+'.':src==='confirme'?' Confirmé par les deux joueurs.':src==='arbitre'?' Validé par un arbitre'+(S.arb[o.eff.refBy]&&S.arb[o.eff.refBy].nom?' ('+esc(S.arb[o.eff.refBy].nom)+')':'')+'.':'')+'</p>';
+  const repTxt=x=>{if(!x)return '';if(x.forfait)return 'forfait de '+(x.forfait==='A'?o.a.p.nom:o.b.p.nom);let a=0,b=0;(x.sets||[]).forEach(z=>{z[0]>z[1]?a++:b++});return (a>b?o.a.p.nom:o.b.p.nom)+' gagne '+Math.max(a,b)+':'+Math.min(a,b)+' ('+(x.sets||[]).map(z=>z[0]+'-'+z[1]).join(' · ')+')'};
+  if(src==='conteste')h+='<p class="msg err"><b>Score contesté.</b> '+esc(o.a.p.nom)+' a entré '+esc(repTxt(o.eff.ra))+' ; '+esc(o.b.p.nom)+' a entré '+esc(repTxt(o.eff.rb))+'. '+(S.admin?'Valide le bon score ci-dessous.':'L\'organisateur va trancher.')+'</p>';
+  if(S.admin&&o.st!=='done'){const iss=dispoIssues(id);if(iss.length)h+='<p class="msg info">⚠ '+esc(iss.join(' · '))+'. Tu peux déplacer le match ci-dessous.</p>'}
+  const ready=o.a.st==='ok'&&o.b.st==='ok'&&!o.a.p.placeholder&&!o.b.p.placeholder;
+  const meIn=!!(S.me&&ready&&(o.a.p.id===S.me||o.b.p.id===S.me));
+  if(S.admin&&ready&&o.eff&&(src==='attente'||src==='conteste')){
+    const opts=[];if(o.eff.ra)opts.push(['A',o.a.p.nom,o.eff.ra]);if(o.eff.rb)opts.push(['B',o.b.p.nom,o.eff.rb]);
+    h+='<div class="repbox">'+opts.map(x=>'<div class="row" style="justify-content:space-between"><span>Score de <b>'+esc(x[1])+'</b> : '+esc(repTxt(x[2]))+'</span><button class="btn sm" type="button" data-valid="'+x[0]+'">Valider ce score</button></div>').join('')+'</div>';
+  }
+  const asRef=!meIn&&ready&&isRef()&&!S.admin&&src!=='admin';
+  if((meIn&&!S.admin&&src!=='admin')||asRef){
+    const mine=reportOf(S.me,id);
+    const others=[];if(o.eff&&o.eff.ra&&o.a.p.id!==S.me)others.push(['A',o.a.p.nom,o.eff.ra]);if(o.eff&&o.eff.rb&&o.b.p.id!==S.me)others.push(['B',o.b.p.nom,o.eff.rb]);
+    const pre=((mine||(others[0]&&others[0][2])||effR(id)||{}).sets)||[];
+    h+='<div class="repbox">'+(asRef?'<div class="eyebrow" style="color:var(--red);margin-bottom:6px">Arbitre</div>':'');
+    if(mine){h+='<div>'+(asRef?'Tu as validé':'Tu as entré')+' : <b>'+esc(repTxt(mine))+'</b>.</div><div class="row" id="pActs"><button class="btn" type="button" id="pEdit">Modifier le score</button><button class="btn ghost" type="button" id="pWithdraw">'+(asRef?'Retirer ma validation':'Retirer mon score')+'</button></div>'}
+    else if(others.length){h+=others.map(x=>'<div><b>'+esc(x[1])+'</b> a entré : <b>'+esc(repTxt(x[2]))+'</b>.'+(asRef?'':' C\'est bien ça ?')+'</div><div class="row"><button class="btn" type="button" data-confirm="'+x[0]+'">'+(asRef?'Confirmer ce score':'Oui, confirmer')+'</button></div>').join('')+'<div class="row" id="pActs"><button class="btn ghost" type="button" id="pEdit">'+(asRef?'Modifier le score':'Non, entrer le vrai score')+'</button></div>'}
+    h+='<form id="pScore"'+(mine||others.length?' hidden':'')+'><div style="font-weight:700;margin-top:6px">'+(asRef?'Score validé par l\'arbitre':mine?'Modifier ton score':'Entre le score partie par partie')+'</div>'+stepRows('p',na,nb,pre)+'<div class="hint">La partie 3 apparaît seulement à 1:1.'+(asRef?' Ton score devient officiel tout de suite.':' Fais-le à la table, devant ton adversaire, pour qu\'il confirme tout de suite.')+'</div><div class="row"><button class="btn" type="submit" id="pGo" style="flex:1">Confirmer</button></div></form><div id="pMsg"></div></div>';
+  }
+  if(!S.admin&&!((meIn&&src!=='admin')||asRef)){
+    let why='';
+    if(!ready)why='<b>Le score s\'entre ici dès que les deux joueurs sont connus.</b> Pour l\'instant, ce match attend '+esc([o.a,o.b].filter(x=>x.st!=='ok'||x.p.placeholder).map(x=>x.st==='ok'?'une inscription (Place libre)':(x.lab||'un joueur')).join(' et '))+'.';
+    else if(src==='admin'||src==='arbitre'||src==='confirme')why='';
+    else if(S.mode==='offline')why='<b>Entrée des scores désactivée sur cette copie.</b> Ouvre le site en ligne (lien Claude ou Netlify configuré) pour entrer les scores.';
+    else if(!S.me)why='<b>Connecte-toi pour entrer le score.</b> Les deux joueurs du match, les arbitres et l\'organisateur peuvent l\'entrer.';
+    else why='Seuls les deux joueurs de ce match, un arbitre ou l\'organisateur peuvent entrer le score.';
+    if(why)h+='<p class="msg info">'+why+'</p>';
+  }
+  if(S.admin){
+    const sets=r.sets||[];
+    h+='<form id="scoreForm">'+stepRows('s',na,nb,sets)+'<div class="kv3"><div class="field"><label for="mj">Jour</label><select id="mj"><option value="">Automatique</option>'+c.jours.map(ds=>'<option value="'+ds+'"'+(r.jour===ds?' selected':'')+'>'+esc(dayShort(ds))+'</option>').join('')+'</select></div><div class="field"><label for="mh">Heure</label><input type="time" id="mh" value="'+esc(r.heure||'')+'"></div><div class="field"><label for="mt">Table</label><input type="number" min="1" max="20" id="mt" value="'+esc(r.table||'')+'"></div></div>'+
+      '<div class="row"><button class="btn" type="submit">Enregistrer</button><button class="btn ghost" type="button" id="mLive"'+(ready?'':' disabled')+'>'+(r.live?'Retirer « en cours »':'Marquer en cours')+'</button></div>'+
+      '<div class="row" style="margin-top:10px"><button class="btn ghost sm" type="button" id="ffA"'+(ready?'':' disabled')+'>Forfait '+esc(na)+'</button><button class="btn ghost sm" type="button" id="ffB"'+(ready?'':' disabled')+'>Forfait '+esc(nb)+'</button><button class="btn ghost sm" type="button" id="mClr">Effacer</button></div>'+
+      (ready?'':'<p class="msg info">Les deux joueurs ne sont pas encore connus. Tu peux quand même fixer le jour, l\'heure et la table.</p>')+'<div id="mMsg"></div></form>';
+  }
+  h+='<div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn ghost" type="button" id="mClose">Fermer</button></div>';
+  md.innerHTML=h;$('#ov').hidden=false;$('#mClose').focus();
+  $('#mClose').onclick=closeModal;
+  if((meIn&&!S.admin&&src!=='admin')||asRef){
+    const pm=t=>$('#pMsg').innerHTML=t;
+    const saveRep=async rep=>{const cur=Object.assign({},S.rapports[S.me]||{});if(rep)cur[id]=Object.assign({},rep,{at:Date.now()});else delete cur[id];
+      try{await S.db.doc('rapports/'+S.me).set({reports:cur});closeModal()}catch(_){pm('<div class="msg err">Pas enregistré. Vérifie ta connexion et réessaie.</div>')}};
+    document.querySelectorAll('[data-confirm]').forEach(bt=>bt.onclick=()=>{const x=bt.dataset.confirm==='A'?o.eff.ra:o.eff.rb;saveRep({sets:x.sets||[],forfait:x.forfait||null})});
+    const ed=$('#pEdit');if(ed)ed.onclick=()=>{$('#pScore').hidden=false;const a=$('#pActs');if(a)a.hidden=true;const f=$('#p0a');if(f)f.focus()};
+    const wd=$('#pWithdraw');if(wd)wd.onclick=()=>saveRep(null);
+    bindSteps('p',na,nb,$('#pGo'),asRef?'Valider':'Confirmer');
+    $('#pScore').onsubmit=e=>{e.preventDefault();
+      const sets=readSets('p').filter((z,i)=>!$('#prow'+i).hidden);
+      const err=checkSets(sets);if(err){pm('<div class="msg err">'+esc(err)+'</div>');return}
+      saveRep({sets,forfait:null})};
+  }
+  if(!S.admin)return;
+  const save=async patch=>{try{await S.db.doc('matchs/'+id).set(Object.assign({},S.matchs[id]||{},patch,{maj:Date.now()}));closeModal()}catch(e){$('#mMsg').innerHTML='<div class="msg err">Pas enregistré. Vérifie ta connexion et réessaie.</div>'}};
+  document.querySelectorAll('[data-valid]').forEach(bt=>bt.onclick=()=>{const x=bt.dataset.valid==='A'?o.eff.ra:o.eff.rb;save({sets:x.sets||[],forfait:x.forfait||null,live:false})});
+  bindSteps('s',na,nb,null);
+  $('#scoreForm').onsubmit=e=>{e.preventDefault();
+    const sets=readSets('s').filter((z,i)=>!$('#srow'+i).hidden);
+    let a=0,b=0,bad=false;for(const s of sets){if(s[0]===s[1]){bad=true;continue}if(Math.max(s[0],s[1])<11||Math.abs(s[0]-s[1])<2)bad=true;s[0]>s[1]?a++:b++}
+    const mm=$('#mMsg');
+    if(sets.length&&!ready){mm.innerHTML='<div class="msg err">Les deux joueurs doivent être connus pour entrer un score.</div>';return}
+    if(sets.length&&a<2&&b<2){mm.innerHTML='<div class="msg err">Il faut 2 sets gagnés pour finir le match (meilleur de 3).</div>';return}
+    if(a>=2&&b>=2){mm.innerHTML='<div class="msg err">Score impossible en meilleur de 3.</div>';return}
+    if(bad&&!mm.dataset.warned){mm.dataset.warned='1';mm.innerHTML='<div class="msg err">Un set ne finit pas à 11 avec 2 points d\'écart. Clique encore Enregistrer pour garder ce score.</div>';return}
+    save({sets,forfait:sets.length?null:(r.forfait||null),live:sets.length?false:!!r.live,jour:$('#mj').value||null,heure:$('#mh').value||null,table:$('#mt').value||null})};
+  $('#mLive').onclick=()=>save({live:!r.live});
+  $('#ffA').onclick=()=>save({forfait:'A',live:false});
+  $('#ffB').onclick=()=>save({forfait:'B',live:false});
+  $('#mClr').onclick=async()=>{try{await S.db.doc('matchs/'+id).delete();closeModal()}catch(e){$('#mMsg').innerHTML='<div class="msg err">Pas effacé. Réessaie.</div>'}};
+}
+function stepRows(px,na,nb,pre){
+  let h='<div class="steps"><div class="srow shead"><span></span><span>'+esc(na)+'</span><span></span><span>'+esc(nb)+'</span></div>';
+  for(let i=0;i<3;i++){const z=pre[i]||['',''];h+='<div class="srow" id="'+px+'row'+i+'"><span class="slab">Partie '+(i+1)+'</span><input type="number" inputmode="numeric" min="0" max="99" id="'+px+i+'a" value="'+esc(z[0])+'" aria-label="Partie '+(i+1)+' '+esc(na)+'"><span>–</span><input type="number" inputmode="numeric" min="0" max="99" id="'+px+i+'b" value="'+esc(z[1])+'" aria-label="Partie '+(i+1)+' '+esc(nb)+'"></div>'}
+  return h+'<div class="ssum" id="'+px+'Sum"></div></div>';
+}
+function readSets(px){return [0,1,2].map(i=>[$('#'+px+i+'a').value,$('#'+px+i+'b').value]).filter(z=>z[0]!==''||z[1]!=='').map(z=>[+z[0]||0,+z[1]||0])}
+function setOk(z){return z&&z[0]!==z[1]&&Math.max(z[0],z[1])>=11&&Math.abs(z[0]-z[1])>=2&&(Math.max(z[0],z[1])===11||Math.abs(z[0]-z[1])===2)}
+// shows partie 2 once partie 1 is done, partie 3 only at 1:1, and the winner with the score (2:0 / 2:1) at the end
+function bindSteps(px,na,nb,btn,label){
+  const run=()=>{
+    const v=i=>{const a=$('#'+px+i+'a').value,b=$('#'+px+i+'b').value;return a!==''&&b!==''?[+a,+b]:null};
+    const s0=v(0),s1=v(1);
+    const show1=!!(s0&&setOk(s0)),split=show1&&s1&&setOk(s1)&&((s0[0]>s0[1])!==(s1[0]>s1[1]));
+    $('#'+px+'row1').hidden=!show1;$('#'+px+'row2').hidden=!split;
+    const sets=[s0,show1?s1:null,split?v(2):null].filter(Boolean);
+    let a=0,b=0;sets.forEach(z=>{if(setOk(z))z[0]>z[1]?a++:b++});
+    const bad=sets.find(z=>!setOk(z)),sum=$('#'+px+'Sum');
+    if(bad){sum.className='ssum err';sum.textContent=checkSets([bad])||'Score de partie impossible.'}
+    else if(a>=2||b>=2){const w=a>b?na:nb;sum.className='ssum win';sum.innerHTML='🏆 <b>'+esc(w)+'</b> gagne <b>'+Math.max(a,b)+':'+Math.min(a,b)+'</b>'}
+    else{sum.className='ssum';sum.textContent=sets.length?'Score des parties : '+a+':'+b+(a===1&&b===1?' · entre la partie 3':' · entre la partie suivante'):'Entre le score de la partie 1.'}
+    if(btn){const done=!bad&&(a>=2||b>=2);btn.disabled=!done;btn.textContent=done?label+' : '+(a>b?na:nb)+' gagne '+Math.max(a,b)+':'+Math.min(a,b):label}
+  };
+  [0,1,2].forEach(i=>['a','b'].forEach(k=>$('#'+px+i+k).addEventListener('input',run)));
+  run();
+}
+function checkSets(sets){
+  if(!sets.length)return 'Entre au moins deux sets.';
+  let a=0,b=0;for(const z of sets){if(z[0]===z[1])return 'Un set ne peut pas finir à égalité.';if(Math.max(z[0],z[1])<11)return 'Un set se gagne à 11 points minimum.';if(Math.abs(z[0]-z[1])<2)return 'Un set se gagne avec 2 points d\'écart.';if(Math.max(z[0],z[1])>11&&Math.abs(z[0]-z[1])!==2)return 'Après 10-10, le set finit avec exactement 2 points d\'écart (ex. 12-10).';z[0]>z[1]?a++:b++}
+  if(a>=2&&b>=2)return 'Score impossible en meilleur de 3.';
+  if(a<2&&b<2)return 'Il faut 2 sets gagnés pour finir le match.';
+  if((a===2&&sets.length===3&&sets[2][0]<sets[2][1])||(b===2&&sets.length===3&&sets[2][1]<sets[2][0]))return 'Le match était déjà fini après 2 sets.';
+  if(sets.length===3&&(a===3||b===3))return 'Le match s\'arrête à 2 sets gagnés.';
+  return '';
+}
+function closeModal(){$('#ov').hidden=true}
+$('#ov').addEventListener('click',e=>{if(e.target.id==='ov')closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+document.addEventListener('click',e=>{const t=e.target.closest('[data-mid]');if(t)openMatch(t.dataset.mid)});
+$('#who').addEventListener('change',e=>{store.set('pp_who',e.target.value);renderFinder();renderBracket();renderSched()});
+
+/* --- organizer --- */
+function renderOrga(){
+  if(!S.admin)return;
+  const c=S.cfg,ins=sortedInsc();
+  $('#lockTxt').textContent=c.verrou?'Tableau verrouillé'+(c.verrouAt?' le '+new Date(c.verrouAt).toLocaleString('fr-CA',{dateStyle:'medium',timeStyle:'short'}):'')+'. '+(c.seeds||[]).length+' joueurs dans le tableau.':'Le tableau suit les inscriptions en direct. Avant le premier match, verrouille-le pour figer les positions (ordre d\'inscription).';
+  $('#lockBtns').innerHTML=c.verrou?'<button class="btn ghost" id="unlock" type="button">'+(S.armed==='unlock'?'Confirmer : déverrouiller':'Déverrouiller')+'</button><button class="btn ghost" id="wipe" type="button">'+(S.armed==='wipe'?'Confirmer : effacer les scores':'Effacer tous les scores')+'</button>'
+    :'<button class="btn y" id="lock" type="button">'+(S.armed==='lock'?'Confirmer le verrouillage':'Verrouiller le tableau')+'</button>';
+  const msg=t=>$('#orgMsg').innerHTML=t;
+  const L=$('#lock');if(L)L.onclick=async()=>{if(S.armed!=='lock'){S.armed='lock';renderOrga();return}S.armed=null;
+    const nv=seedList(ins.slice(0,c.capacite),false);
+    try{await saveCfg({verrou:true,seeds:nv,verrouAt:Date.now()});msg('<div class="msg ok">Tableau verrouillé. La version officielle est en ligne.</div>')}catch(e){msg('<div class="msg err">Le verrouillage n\'a pas été enregistré. Réessaie.</div>')}};
+  const U=$('#unlock');if(U)U.onclick=async()=>{if(S.armed!=='unlock'){S.armed='unlock';renderOrga();return}S.armed=null;try{await saveCfg({verrou:false,seeds:null});msg('<div class="msg info">Tableau déverrouillé. Efface les scores si l\'ordre des joueurs change.</div>')}catch(e){msg('<div class="msg err">Échec. Réessaie.</div>')}};
+  const W=$('#wipe');if(W)W.onclick=async()=>{if(S.armed!=='wipe'){S.armed='wipe';renderOrga();return}S.armed=null;try{for(const id of Object.keys(S.matchs))await S.db.doc('matchs/'+id).delete();msg('<div class="msg ok">Scores effacés.</div>')}catch(e){msg('<div class="msg err">Échec partiel. Réessaie.</div>')}};
+  if(!S.cfgFormFilled){
+    $('#c_jours').value=c.jours.join('\n');$('#c_cr').value=c.creneaux.map(x=>x.h+(x.fin?'-'+x.fin:'')+' | '+x.lab).join('\n');
+    $('#c_t').value=c.tables;$('#c_d').value=c.duree;$('#c_cap').value=c.capacite;$('#c_est').value=c.estimation;$('#c_lim').value=c.limite||'';
+    $('#c_anc').value=(c.anciens||[]).map(a=>a.rang+', '+a.nom).join('\n');S.cfgFormFilled=true;
+  }
+  // referees
+  const refs=c.arbitres||[],reqs=Object.keys(S.arb||{}).filter(u=>!refs.includes(u));
+  const nm=u=>(S.arb[u]&&S.arb[u].nom)||((inscById(u)||{}).nom)||'Arbitre';
+  $('#arbList').innerHTML=refs.map(u=>'<li><span class="grow"><b>'+esc(nm(u))+'</b><br><span class="c">Arbitre'+'</span></span><button class="btn ghost sm" type="button" data-arbdel="'+esc(u)+'">Retirer</button></li>').join('')+
+    reqs.map(u=>'<li><span class="grow"><b>'+esc(nm(u))+'</b><br><span class="c">Demande'+'</span></span><button class="btn sm" type="button" data-arbok="'+esc(u)+'">Approuver</button><button class="btn ghost sm" type="button" data-arbno="'+esc(u)+'">Refuser</button></li>').join('')||'<li>Aucun arbitre pour l\'instant.</li>';
+  // scores entered by players
+  const vl=[];if(VIEW)for(const m of VIEW.B.order){const o=VIEW.R[m.id];if(!o.eff||!(o.eff.src==='conteste'||o.eff.src==='attente'))continue;vl.push({m,o})}
+  vl.sort((x,y)=>(x.o.eff.src==='conteste'?0:1)-(y.o.eff.src==='conteste'?0:1));
+  $('#verifList').innerHTML=vl.map(x=>'<li class="click" data-mid="'+x.m.id+'" style="cursor:pointer"><span class="grow"><b>'+esc(x.m.id)+'</b> · '+esc(x.o.a.p.nom)+' vs '+esc(x.o.b.p.nom)+'<br><span class="c">'+(x.o.eff.src==='conteste'?'⚠ Contesté : les deux joueurs ne sont pas d\'accord':'En attente de confirmation de '+esc(x.o.eff.other.nom))+'</span></span><span class="btn ghost sm">Ouvrir</span></li>').join('')||'<li>Rien à vérifier.</li>';
+  // availability heat table
+  const maxN=Math.max(1,ins.length);
+  let hh='<table class="heat" style="min-width:0"><thead><tr><th>Jour</th>'+c.creneaux.map(x=>'<th>'+esc(x.lab)+'</th>').join('')+'<th>Préféré</th></tr></thead><tbody>';
+  for(const ds of c.jours){
+    hh+='<tr><td>'+esc(dayShort(ds))+'</td>';
+    for(const cr of c.creneaux){const n=ins.filter(x=>(x.jours||[]).includes(ds)&&(x.heures||[]).includes(cr.h)).length;const a=n/maxN;
+      hh+='<td><span class="n" style="background:rgba(163,48,63,'+(0.08+a*0.7).toFixed(2)+');color:'+(a>.5?'#fff':'var(--ink)')+'">'+n+'</span></td>'}
+    hh+='<td>'+ins.filter(x=>x.prefJour===ds).length+'</td></tr>';
+  }
+  $('#heat').innerHTML=hh+'</tbody></table>';
+  const seeded=new Set((c.seeds||[]).map(s=>s.id));
+  $('#olist').innerHTML=ins.map((x,i)=>{
+    const info=[S.contacts[x.id]&&S.contacts[x.id].contact,cohLab(x.cohorte),(NIV.find(n=>n[0]===x.niveau)||[])[1]].filter(Boolean).join(' · ');
+    const dis=(x.jours&&x.jours.length?'Jours : '+x.jours.map(d=>dp(d).wd+' '+dp(d).d).join(', '):'')+(x.heures&&x.heures.length?' · '+x.heures.map(h=>(c.creneaux.find(z=>z.h===h)||{lab:h}).lab).join(', '):'')+(x.prefJour?' · préfère '+dp(x.prefJour).wd+' '+dp(x.prefJour).d:'');
+    return '<li><span class="chip q">'+(i+1)+'</span><span class="grow"><b>'+esc(x.nom)+'</b>'+(x.manuel?' <span class="c">(ajouté par toi)</span>':'')+(c.verrou&&!seeded.has(x.id)?' <span class="c">· hors tableau</span>':'')+(i>=c.capacite?' <span class="c">· attente</span>':'')+'<br><span class="c">'+esc(info)+'</span>'+(dis?'<br><span class="c">'+esc(dis)+'</span>':'')+'</span><button class="btn ghost sm" type="button" data-del="'+esc(x.id)+'">'+(S.armed==='d_'+x.id?'Confirmer':'Retirer')+'</button></li>'}).join('')||'<li>Aucun inscrit pour l\'instant.</li>';
+}
+async function saveCfg(patch){await S.db.doc('tournoi/config').set(Object.assign({},S.cfg,patch))}
+$('#arbList').addEventListener('click',async e=>{const ok=e.target.closest('[data-arbok]'),no=e.target.closest('[data-arbno]'),del=e.target.closest('[data-arbdel]');
+  try{
+    if(ok)await saveCfg({arbitres:[...new Set([...(S.cfg.arbitres||[]),ok.dataset.arbok])]});
+    if(no)await S.db.doc('arbitres/'+no.dataset.arbno).delete();
+    if(del)await saveCfg({arbitres:(S.cfg.arbitres||[]).filter(u=>u!==del.dataset.arbdel)});
+  }catch(_){$('#orgMsg').innerHTML='<div class="msg err">Pas enregistré. Réessaie.</div>'}});
+$('#olist').addEventListener('click',async e=>{const b=e.target.closest('[data-del]');if(!b)return;const id=b.dataset.del;if(S.armed!=='d_'+id){S.armed='d_'+id;renderOrga();return}S.armed=null;try{await S.db.doc('inscriptions/'+id).delete();try{await S.db.doc('contacts/'+id).delete()}catch(_){}}catch(_){$('#orgMsg').innerHTML='<div class="msg err">Retrait impossible.</div>'}});
+$('#addForm').addEventListener('submit',async e=>{e.preventDefault();const n=$('#addName').value.trim();if(!n)return;try{await S.db.collection('inscriptions').doc('m_'+Date.now().toString(36)).set({nom:n.slice(0,28),manuel:true,createdAt:Date.now()});$('#addName').value=''}catch(_){$('#orgMsg').innerHTML='<div class="msg err">Ajout impossible.</div>'}});
+$('#cfgForm').addEventListener('submit',async e=>{e.preventDefault();
+  const jours=$('#c_jours').value.split('\n').map(s=>s.trim()).filter(s=>/^\d{4}-\d{2}-\d{2}$/.test(s));
+  const cr=$('#c_cr').value.split('\n').map(s=>s.trim()).filter(Boolean).map(l=>{const [t,lab]=l.split('|').map(x=>(x||'').trim());const m=t.match(/^(\d{1,2}:\d{2})\s*(?:-\s*(\d{1,2}:\d{2}))?$/);return m?Object.assign({h:m[1].padStart(5,'0'),lab:lab||t},m[2]?{fin:m[2].padStart(5,'0')}:{}):null}).filter(Boolean);
+  const anc=$('#c_anc').value.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{const m=l.match(/^(\d+)\s*[,.\-:)]\s*(.+)$/);return m?{rang:+m[1],nom:m[2].trim()}:{rang:'',nom:l}});
+  if(!jours.length||!cr.length){$('#cfgMsg').innerHTML='<div class="msg err">Il faut au moins une date (AAAA-MM-JJ) et un créneau (ex. 12:00 | 12 h).</div>';return}
+  try{await saveCfg({jours,creneaux:cr,tables:Math.max(1,+$('#c_t').value||1),duree:Math.max(5,+$('#c_d').value||20),capacite:Math.max(2,+$('#c_cap').value||24),estimation:Math.max(0,+$('#c_est').value||0),limite:$('#c_lim').value||null,anciens:anc});$('#cfgMsg').innerHTML='<div class="msg ok">Enregistré.</div>';S.cfgFormFilled=false}
+  catch(_){$('#cfgMsg').innerHTML='<div class="msg err">Pas enregistré. Réessaie.</div>'}});
+
+/* ---------- render all ---------- */
+function updateArrows(){document.querySelectorAll('.hscroll').forEach(w=>{const sc=w.firstElementChild,l=w.querySelector('.hs-arrow.l'),rr=w.querySelector('.hs-arrow.r');if(!sc||!l||!rr)return;
+  const more=sc.scrollWidth>sc.clientWidth+4;l.hidden=!more||sc.scrollLeft<8;rr.hidden=!more||sc.scrollLeft+sc.clientWidth>=sc.scrollWidth-8})}
+document.addEventListener('scroll',e=>{if(e.target&&e.target.closest&&e.target.closest('.hscroll'))updateArrows()},true);
+window.addEventListener('resize',updateArrows);
+document.addEventListener('click',e=>{const a=e.target.closest('.hs-arrow');if(!a)return;const sc=a.parentElement.firstElementChild;sc.scrollBy({left:(a.classList.contains('r')?1:-1)*sc.clientWidth*0.8,behavior:'smooth'})});
+function renderAll(){derive();renderHero();renderPlayers();renderForm();renderFinder();renderBracket();renderSched();renderProfile();renderOrga();$('#tabOrga').hidden=!S.admin;$('#bnOrga').hidden=!S.admin;setView();requestAnimationFrame(updateArrows)}
+renderAll();
+
+/* ---------- live data ---------- */
+let renderTimer=null;const soon=()=>{clearTimeout(renderTimer);renderTimer=setTimeout(renderAll,30)};
+function subscribeData(db){
+  let pending=3;const done=()=>{if(pending>0&&--pending===0){S.loaded=true;soon()}};
+  let c1=false,c2=false,c3=false;
+  db.doc('tournoi/config').onSnapshot(s=>{S.cfg=norm(s.exists?s.data():{});if(!c1){c1=true;done()}soon()},()=>{if(!c1){c1=true;done()}});
+  db.collection('inscriptions').onSnapshot(q=>{S.insc=q.docs.map(d=>Object.assign({id:d.id},d.data()));if(!c2){c2=true;done()}soon()},()=>{if(!c2){c2=true;done()}});
+  db.collection('matchs').onSnapshot(q=>{const m={};q.docs.forEach(d=>m[d.id]=d.data());S.matchs=m;if(!c3){c3=true;done()}soon()},()=>{if(!c3){c3=true;done()}});
+  db.collection('arbitres').onSnapshot(q=>{const m={};q.docs.forEach(d=>m[d.id]=d.data()||{});S.arb=m;soon()},()=>{});
+  db.collection('rapports').onSnapshot(q=>{const m={};q.docs.forEach(d=>{const x=d.data();m[d.id]=(x&&x.reports)||{}});S.rapports=m;soon()},()=>{});
+}
+function initFirebase(){
+  const cfg=window.FIREBASE_CONFIG;
+  if(!(firebase.apps&&firebase.apps.length))firebase.initializeApp(cfg); // Firebase Hosting's /__/firebase/init.js may already have done it
+  const auth=firebase.auth(),db=firebase.firestore();
+  S.mode='firebase';S.auth=auth;S.db=db;
+  subscribeData(db);
+  const admins=(window.ADMIN_EMAILS||[]).map(x=>String(x).toLowerCase());
+  let unC=null,unCs=null;
+  auth.onAuthStateChanged(u=>{
+    S.me=u?u.uid:null;S.email=u?(u.email||''):'';S.admin=!!(u&&u.emailVerified&&admins.includes(S.email.toLowerCase()));S.authReady=true;S.formKey=null;S.editing=false;
+    if(unC)unC();if(unCs)unCs();unC=unCs=null;S.contactMine='';S.contacts={};
+    if(S.me)unC=db.doc('contacts/'+S.me).onSnapshot(x=>{S.contactMine=x.exists?x.data().contact:'';soon()},()=>{});
+    if(S.admin)unCs=db.collection('contacts').onSnapshot(q=>{const c={};q.docs.forEach(d=>c[d.id]=d.data());S.contacts=c;soon()},()=>{});
+    renderAll();
+  });
+}
+(async()=>{
+  if(window.claude&&claude.use){
+    S.mode='claude';
+    const [db,user]=await Promise.all([claude.use('db'),claude.use('user')]);
+    S.db=db;S.user=user;
+    if(user){try{S.me=await user.id()}catch(_){}try{S.admin=await user.canEdit()}catch(_){}}
+    if(!db){S.loaded=true;renderAll();return}
+    subscribeData(db);
+    if(S.me)db.doc('contacts/'+S.me).onSnapshot(x=>{S.contactMine=x.exists?x.data().contact:''},()=>{});
+    if(S.admin)db.collection('contacts').onSnapshot(q=>{const c={};q.docs.forEach(d=>c[d.id]=d.data());S.contacts=c;soon()},()=>{});
+    return;
+  }
+  const cfg=window.FIREBASE_CONFIG;
+  if(window.firebase&&((firebase.apps&&firebase.apps.length)||(cfg&&cfg.apiKey&&!/COLLE/.test(cfg.apiKey)))){try{initFirebase();return}catch(e){console.error(e)}}
+  S.mode='offline';S.loaded=true;renderAll();
+})();
+})();
+</script>
+
+</body>
+</html>
