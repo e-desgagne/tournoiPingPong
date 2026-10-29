@@ -2,50 +2,53 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Organisateur : courriel confirmé et présent dans cette liste
+    // Vérifie si l'utilisateur connecté est un administrateur (basé sur son email)
     function isAdmin() {
-      return request.auth != null
-        && request.auth.token.email_verified == true
-        && request.auth.token.email in ['bartolomeovictor@gmail.com'];
-    }
-    function isSelf(uid) {
-      return request.auth != null && request.auth.uid == uid;
+      return request.auth != null && (
+        request.auth.token.email == "ton.courriel@ens.etsmtl.ca"
+        // Ajoute d'autres emails d'admins ici si besoin :
+        // || request.auth.token.email == "autre.admin@ens.etsmtl.ca"
+      );
     }
 
-    // Réglages du tournoi et scores : tout le monde lit, seul l'organisateur écrit
-    match /tournoi/{doc} {
+    // Inscriptions au tournoi
+    match /inscriptions/{userId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    match /contacts/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    match /rapports/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    match /arbitres/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Gestion des matchs : Sécurisé !
+    match /matchs/{matchId} {
+      allow read: if true;
+      // Un match peut être modifié uniquement si :
+      // 1. C'est un administrateur
+      // 2. OU l'utilisateur connecté fait partie des joueurs du match (resource.data.player1 ou player2)
+      // 3. OU il s'inscrit en tant que l'un des joueurs lors de la création
+      allow write: if request.auth != null && (
+        isAdmin() || 
+        request.auth.uid == request.resource.data.player1Id || 
+        request.auth.uid == request.resource.data.player2Id ||
+        request.auth.uid == resource.data.player1Id || 
+        request.auth.uid == resource.data.player2Id
+      );
+    }
+    
+    // Paramètres globaux du tournoi : Réservé aux admins uniquement
+    match /tournoi/{document=**} {
       allow read: if true;
       allow write: if isAdmin();
-    }
-    match /matchs/{id} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-
-    // Inscriptions : visibles par tous (nom, icône, dispos), chacun modifie la sienne
-    match /inscriptions/{uid} {
-      allow read: if true;
-      allow create, update: if isAdmin()
-        || (isSelf(uid) && request.resource.data.nom is string && request.resource.data.nom.size() <= 28);
-      allow delete: if isAdmin() || isSelf(uid);
-    }
-
-    // Scores entrés par les joueurs : tout le monde lit, chacun écrit seulement les siens
-    match /rapports/{uid} {
-      allow read: if true;
-      allow write: if isAdmin() || isSelf(uid);
-    }
-
-    // Demandes d'arbitre (nom seulement) : l'organisateur approuve dans index.html
-    match /arbitres/{uid} {
-      allow read: if true;
-      allow write: if isAdmin() || (isSelf(uid) && request.resource.data.keys().hasOnly(['nom','at']));
-      allow delete: if isAdmin() || isSelf(uid);
-    }
-
-    // Contacts (courriel / Discord) : seulement la personne et l'organisateur
-    match /contacts/{uid} {
-      allow read, write: if isAdmin() || isSelf(uid);
     }
   }
 }
